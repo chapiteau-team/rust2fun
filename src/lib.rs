@@ -2,7 +2,6 @@
 
 #![no_std]
 #![deny(missing_docs)]
-#![deny(missing_debug_implementations)]
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -19,10 +18,12 @@ macro_rules! if_std {
 	( $( $code:tt )* ) => {};
 }
 
+pub mod combinator;
 pub mod higher;
 
 /// Convenience re-export of common members of the library.
 pub mod prelude {
+	pub use crate::combinator::*;
 	pub use crate::higher::*;
 }
 
