@@ -23,7 +23,7 @@ pub trait Higher {
     /// Type parameter abstracted by Higher, i.e `Option<Param>`.
     type Param;
     /// Swapped higher type, i.e Target = Option<T>.
-    type Target<T>: Higher;
+    type Target<T>: Higher<Param=T>;
 }
 
 /// Macro implementing `Higher` for a given type of kind `* -> *`.

@@ -20,10 +20,12 @@ macro_rules! if_std {
 
 pub mod combinator;
 pub mod higher;
+pub mod invariant;
 
 /// Convenience re-export of common members of the library.
 pub mod prelude {
 	pub use crate::combinator::*;
 	pub use crate::higher::*;
+	pub use crate::invariant::*;
 }
 
