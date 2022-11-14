@@ -51,7 +51,7 @@ pub trait Higher {
 #[macro_export]
 macro_rules! higher {
     ($t:ident) => {
-        impl<P> Higher for $t<P> {
+        impl<P> $crate::higher::Higher for $t<P> {
             type Param = P;
             type Target<T> = $t<T>;
         }
@@ -66,10 +66,9 @@ impl<P, E> Higher for Result<P, E> {
 }
 
 if_std! {
-    use std::vec::Vec;
     use std::boxed::Box;
     use std::collections::*;
-    use std::rc::Rc;
+    use std::vec::Vec;
 
     higher!(Vec);
     higher!(Box);
@@ -78,5 +77,4 @@ if_std! {
     higher!(BTreeSet);
     higher!(VecDeque);
     higher!(HashSet);
-    higher!(Rc);
 }

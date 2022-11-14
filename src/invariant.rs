@@ -1,9 +1,10 @@
 //! Invariant functors.
 
+use crate::functor::Functor;
 use crate::higher::Higher;
 
 /// Invariant functor (also known as exponential functor).
-pub trait Invariant: Higher {
+pub trait Invariant<MapB>: Higher {
     /// Transform a `Self<A>` into a `Self<B>` by providing a transformation from `A` to `B`
     /// and one from `B` to `A`.
     ///
@@ -16,29 +17,15 @@ pub trait Invariant: Higher {
     /// let actual = x.imap(|s| s.parse::<i32>().unwrap(), |i| i.to_string());
     /// assert_eq!(Some(1), actual);
     /// ```
-    fn imap<B, F, G>(self, f: F, g: G) -> Self::Target<B>
-        where F: FnMut(Self::Param) -> B,
-              G: FnMut(B) -> Self::Param;
+    fn imap<F, G>(self, f: F, g: G) -> Self::Target<MapB>
+        where F: FnMut(Self::Param) -> MapB,
+              G: FnMut(MapB) -> Self::Param;
 }
 
-impl<A> Invariant for Option<A> {
-    #[inline]
-    fn imap<B, F, G>(self, f: F, _g: G) -> Option<B>
-        where F: FnMut(Self::Param) -> B,
-              G: FnMut(B) -> Self::Param {
+impl<MapB, T: Functor<MapB>> Invariant<MapB> for T {
+    fn imap<F, G>(self, f: F, _g: G) -> Self::Target<MapB>
+        where F: FnMut(Self::Param) -> MapB,
+              G: FnMut(MapB) -> Self::Param {
         self.map(f)
-    }
-}
-
-if_std! {
-    use std::vec::Vec;
-
-    impl<A> Invariant for Vec<A> {
-        #[inline]
-        fn imap<B, F, G>(self, f: F, _g: G) -> Self::Target<B>
-            where F: FnMut(Self::Param) -> B,
-                  G: FnMut(B) -> Self::Param {
-            self.into_iter().map(f).collect::<Vec<_>>()
-        }
     }
 }

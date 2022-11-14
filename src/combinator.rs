@@ -79,18 +79,35 @@ macro_rules! flip {
     };
  }
 
-/// The constant function *constant(x) = _ -> x* also known as K (Kestrel) combinator.
+/// The constant with no arguments *constant(x) = () -> x*.
 ///
 /// # Example
 ///
 /// ```
 /// use rust2fun::constant;
 ///
-/// let actual = Some(1).map(constant!(2));
-/// assert_eq!(Some(2), actual);
+/// let f = constant!(42);
+/// assert_eq!(42, f());
 /// ```
 #[macro_export]
 macro_rules! constant {
+    ($x:expr) => {
+        || $x
+    };
+}
+
+/// The constant function *constant1(x) = _ -> x* also known as K (Kestrel) combinator.
+///
+/// # Example
+///
+/// ```
+/// use rust2fun::constant1;
+///
+/// let actual = Some(1).map(constant1!(2));
+/// assert_eq!(Some(2), actual);
+/// ```
+#[macro_export]
+macro_rules! constant1 {
     ($x:expr) => {
         |_| $x
     };
@@ -170,6 +187,7 @@ pub fn apply_to<T, R>(x: T, f: impl FnOnce(T) -> R) -> R {
 /// let actual = substitution(generate, str::len, "Hello, World!");
 /// assert_eq!("The string \"Hello, World!\" has a length of 13", actual);
 /// ```
+#[inline]
 pub fn substitution<A: Copy, B, C, F, G>(f: F, g: G, x: A) -> C
     where F: FnOnce(A, B) -> C,
           G: FnOnce(A) -> B {
