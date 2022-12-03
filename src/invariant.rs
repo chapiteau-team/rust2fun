@@ -18,14 +18,17 @@ pub trait Invariant<MapB>: Higher {
     /// assert_eq!(Some(1), actual);
     /// ```
     fn imap<F, G>(self, f: F, g: G) -> Self::Target<MapB>
-        where F: FnMut(Self::Param) -> MapB,
-              G: FnMut(MapB) -> Self::Param;
+    where
+        F: FnMut(Self::Param) -> MapB,
+        G: FnMut(MapB) -> Self::Param;
 }
 
 impl<MapB, T: Functor<MapB>> Invariant<MapB> for T {
     fn imap<F, G>(self, f: F, _g: G) -> Self::Target<MapB>
-        where F: FnMut(Self::Param) -> MapB,
-              G: FnMut(MapB) -> Self::Param {
+    where
+        F: FnMut(Self::Param) -> MapB,
+        G: FnMut(MapB) -> Self::Param,
+    {
         self.map(f)
     }
 }

@@ -15,13 +15,13 @@ macro_rules! if_std {
 
 #[cfg(not(feature = "std"))]
 macro_rules! if_std {
-	( $( $code:tt )* ) => {};
+    ( $( $code:tt )* ) => {};
 }
 
 pub mod combinator;
+pub mod functor;
 pub mod higher;
 pub mod invariant;
-pub mod functor;
 
 /// Convenience re-export of common members of the library.
 pub mod prelude {
@@ -30,4 +30,3 @@ pub mod prelude {
     pub use crate::higher::*;
     pub use crate::invariant::*;
 }
-

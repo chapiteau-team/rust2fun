@@ -15,7 +15,9 @@ use crate::invariant::Invariant;
 /// assert_eq!(Some(2), f(Some(1)));
 /// ```
 pub fn lift<FA, B>(f: impl FnMut(FA::Param) -> B) -> impl FnOnce(FA) -> FA::Target<B>
-    where FA: Functor<B> {
+where
+    FA: Functor<B>,
+{
     |fa: FA| fa.map(f)
 }
 
@@ -37,8 +39,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// Alias for [map] if the implementing type already had a built-in `.map` method.
     #[inline]
     fn fmap<F>(self, f: F) -> Self::Target<MapB>
-        where F: FnMut(Self::Param) -> MapB,
-              Self: Sized {
+    where
+        F: FnMut(Self::Param) -> MapB,
+        Self: Sized,
+    {
         self.map(f)
     }
 
@@ -55,8 +59,11 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn fproduct<B, F>(self, mut f: F) -> Self::Target<(Self::Param, B)>
-        where F: FnMut(&Self::Param) -> B,
-              Self: Functor<(<Self as Higher>::Param, B), Target<(<Self as Higher>::Param, B)>=MapB> + Sized {
+    where
+        F: FnMut(&Self::Param) -> B,
+        Self: Functor<(<Self as Higher>::Param, B), Target<(<Self as Higher>::Param, B)> = MapB>
+            + Sized,
+    {
         self.map(|a| {
             let rhs = f(&a);
             (a, rhs)
@@ -76,8 +83,11 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn fproduct_left<B, F>(self, mut f: F) -> Self::Target<(B, Self::Param)>
-        where F: FnMut(&Self::Param) -> B,
-              Self: Functor<(B, <Self as Higher>::Param), Target<(B, <Self as Higher>::Param)>=MapB> + Sized {
+    where
+        F: FnMut(&Self::Param) -> B,
+        Self: Functor<(B, <Self as Higher>::Param), Target<(B, <Self as Higher>::Param)> = MapB>
+            + Sized,
+    {
         self.map(|a| (f(&a), a))
     }
 
@@ -93,9 +103,11 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn map_const<B>(self, b: B) -> Self::Target<B>
-        where B: Clone,
-              Self: Functor<B, Target<B>=MapB> + Sized {
-        self.map(constant1!(b.clone()))
+    where
+        B: Copy,
+        Self: Functor<B, Target<B> = MapB> + Sized,
+    {
+        self.map(constant1!(b))
     }
 
     /// Empty the `Self<A>` of the values, preserving the structure.
@@ -109,7 +121,9 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn void(self) -> Self::Target<()>
-        where Self: Functor<(), Target<()>=MapB> + Sized {
+    where
+        Self: Functor<(), Target<()> = MapB> + Sized,
+    {
         self.map_const(())
     }
 
@@ -124,9 +138,12 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn tuple_left<B>(self, b: B) -> Self::Target<(B, Self::Param)>
-        where B: Clone,
-              Self: Functor<(B, <Self as Higher>::Param), Target<(B, <Self as Higher>::Param)>=MapB> + Sized {
-        self.map(|a| (b.clone(), a))
+    where
+        B: Copy,
+        Self: Functor<(B, <Self as Higher>::Param), Target<(B, <Self as Higher>::Param)> = MapB>
+            + Sized,
+    {
+        self.map(|a| (b, a))
     }
 
     /// Tuples the `A` value in `Self<A>` with the supplied `B` value, with the `B` value on the right.
@@ -140,9 +157,12 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn tuple_right<B>(self, b: B) -> Self::Target<(Self::Param, B)>
-        where B: Clone,
-              Self: Functor<(<Self as Higher>::Param, B), Target<(<Self as Higher>::Param, B)>=MapB> + Sized {
-        self.map(move |a| (a, b.clone()))
+    where
+        B: Copy,
+        Self: Functor<(<Self as Higher>::Param, B), Target<(<Self as Higher>::Param, B)> = MapB>
+            + Sized,
+    {
+        self.map(move |a| (a, b))
     }
 
     /// Un-zips an `Self<(A, B)>` consisting of element pairs into two separate Self's tupled.
@@ -157,8 +177,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn unzip<A, B>(self) -> (Self::Target<A>, Self::Target<B>)
-        where Self: Functor<A, Param=(A, B), Target<A>=MapB> + Functor<B> + Clone + Sized {
-        (self.clone().map(|x: (A, B)| x.0), self.map(|x: (A, B)| x.1))
+    where
+        Self: Functor<A, Param = (A, B), Target<A> = MapB> + Functor<B> + Copy + Sized,
+    {
+        (self.map(|x: (A, B)| x.0), self.map(|x: (A, B)| x.1))
     }
 
     /// Lifts `if` to Functor.
@@ -174,9 +196,11 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// ```
     #[inline]
     fn iff<A, T, F>(self, mut if_true: T, mut if_false: F) -> Self::Target<A>
-        where T: FnMut() -> A,
-              F: FnMut() -> A,
-              Self: Functor<A, Param=bool, Target<A>=MapB> + Sized {
+    where
+        T: FnMut() -> A,
+        F: FnMut() -> A,
+        Self: Functor<A, Param = bool, Target<A> = MapB> + Sized,
+    {
         self.map(|x| if x { if_true() } else { if_false() })
     }
 }
@@ -191,7 +215,7 @@ macro_rules! functor_iter {
                 self.into_iter().map(f).collect::<$t<_>>()
             }
         }
-    }
+    };
 }
 
 impl<A, B> Functor<B> for Option<A> {

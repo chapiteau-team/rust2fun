@@ -15,10 +15,13 @@ macro_rules! if_std {
 #[macro_export]
 #[cfg(not(feature = "std"))]
 macro_rules! if_std {
-	( $( $code:tt )* ) => {};
+    ( $( $code:tt )* ) => {};
 }
 
-pub fn parse<T: FromStr>(x: String) -> T where <T as FromStr>::Err: Debug {
+pub fn parse<T: FromStr>(x: String) -> T
+where
+    <T as FromStr>::Err: Debug,
+{
     FromStr::from_str(x.as_str()).unwrap()
 }
 

@@ -77,7 +77,7 @@ macro_rules! flip {
     ($f:expr) => {
         |y, x| $f(x, y)
     };
- }
+}
 
 /// The constant with no arguments *constant(x) = () -> x*.
 ///
@@ -141,7 +141,9 @@ macro_rules! constant2 {
 /// assert_eq!(Some(1), actual);
 /// ```
 #[inline]
-pub const fn id<T>(x: T) -> T { x }
+pub const fn id<T>(x: T) -> T {
+    x
+}
 
 /// The apply function *apply(f, x) = f(x)* also known as A (Apply) combinator.
 /// It is the same as function application.
@@ -189,8 +191,10 @@ pub fn apply_to<T, R>(x: T, f: impl FnOnce(T) -> R) -> R {
 /// ```
 #[inline]
 pub fn substitution<A: Copy, B, C, F, G>(f: F, g: G, x: A) -> C
-    where F: FnOnce(A, B) -> C,
-          G: FnOnce(A) -> B {
+where
+    F: FnOnce(A, B) -> C,
+    G: FnOnce(A) -> B,
+{
     f(x, g(x))
 }
 
@@ -209,9 +213,11 @@ pub fn substitution<A: Copy, B, C, F, G>(f: F, g: G, x: A) -> C
 /// assert_eq!(2, actual);
 #[inline]
 pub fn converge<A: Copy, B, C, D, F, G, H>(f: F, g: G, h: H, x: A) -> D
-    where F: FnOnce(B, C) -> D,
-          G: FnOnce(A) -> B,
-          H: FnOnce(A) -> C {
+where
+    F: FnOnce(B, C) -> D,
+    G: FnOnce(A) -> B,
+    H: FnOnce(A) -> C,
+{
     f(g(x), h(x))
 }
 
@@ -232,8 +238,10 @@ pub fn converge<A: Copy, B, C, D, F, G, H>(f: F, g: G, h: H, x: A) -> D
 /// ```
 #[inline]
 pub fn on<A, B, C, F, G>(f: F, mut g: G, x: A, y: A) -> C
-    where F: FnOnce(B, B) -> C,
-          G: FnMut(A) -> B {
+where
+    F: FnOnce(B, B) -> C,
+    G: FnMut(A) -> B,
+{
     f(g(x), g(y))
 }
 
@@ -251,9 +259,11 @@ pub fn on<A, B, C, F, G>(f: F, mut g: G, x: A, y: A) -> C
 /// assert_eq!(4, actual);
 /// ```
 pub fn if_else<A, B, P, T, F>(predicate: P, if_true: T, if_false: F, x: A) -> B
-    where P: FnOnce(&A) -> bool,
-          T: FnOnce(A) -> B,
-          F: FnOnce(A) -> B {
+where
+    P: FnOnce(&A) -> bool,
+    T: FnOnce(A) -> B,
+    F: FnOnce(A) -> B,
+{
     if predicate(&x) {
         if_true(x)
     } else {
@@ -277,13 +287,17 @@ pub fn if_else<A, B, P, T, F>(predicate: P, if_true: T, if_false: F, x: A) -> B
 /// assert_eq!(8, fix(fibonacci, 6));
 /// ```
 pub fn fix<T, R, F>(f: F, x: T) -> R
-    where F: Fn(&dyn Fn(T) -> R, T) -> R {
+where
+    F: Fn(&dyn Fn(T) -> R, T) -> R,
+{
     trait Rec<T, R> {
         fn apply(&self, x: T) -> R;
     }
 
     impl<T, R, F> Rec<T, R> for F
-        where F: Fn(&dyn Rec<T, R>, T) -> R {
+    where
+        F: Fn(&dyn Rec<T, R>, T) -> R,
+    {
         fn apply(&self, x: T) -> R {
             self(self, x)
         }
