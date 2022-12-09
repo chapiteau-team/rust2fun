@@ -18,6 +18,8 @@
 //! * [Lightweight Higher Kinded Type](https://www.cl.cam.ac.uk/~jdy22/papers/lightweight-higher-kinded-polymorphism.pdf)
 //! * [Rust/Haskell: Higher-Kinded Types (HKT)](https://gist.github.com/CMCDragonkai/a5638f50c87d49f815b8)
 
+use core::marker::PhantomData;
+
 /// Implementation of Lightweight Higher Kinded Type for a type of kind `* -> *`.
 pub trait Higher {
     /// Type parameter abstracted by Higher, i.e `Option<Param>`.
@@ -59,6 +61,7 @@ macro_rules! higher {
 }
 
 higher!(Option);
+higher!(PhantomData);
 
 impl<P, E> Higher for Result<P, E> {
     type Param = P;

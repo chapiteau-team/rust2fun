@@ -19,6 +19,7 @@ macro_rules! if_std {
 }
 
 pub mod combinator;
+pub mod contravariant;
 pub mod functor;
 pub mod higher;
 pub mod invariant;
@@ -26,6 +27,7 @@ pub mod invariant;
 /// Convenience re-export of common members of the library.
 pub mod prelude {
     pub use crate::combinator::*;
+    pub use crate::contravariant::*;
     pub use crate::functor::*;
     pub use crate::higher::*;
     pub use crate::invariant::*;

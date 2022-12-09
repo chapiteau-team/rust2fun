@@ -1,5 +1,7 @@
 //! Functors. The name is short for "covariant functor".
 
+use core::marker::PhantomData;
+
 use crate::constant1;
 use crate::higher::Higher;
 use crate::invariant::Invariant;
@@ -208,14 +210,29 @@ pub trait Functor<MapB>: Invariant<MapB> {
 /// Macro to implement [Functor] for types with [Iterator] support.
 #[macro_export]
 macro_rules! functor_iter {
-    ($t:ident) => {
-        impl<A, B> $crate::functor::Functor<B> for $t<A> {
+    ($name:ident) => {
+        impl<A, B> $crate::functor::Functor<B> for $name<A> {
             #[inline]
             fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
-                self.into_iter().map(f).collect::<$t<_>>()
+                self.into_iter().map(f).collect::<$name<_>>()
             }
         }
     };
+    ($name:ident, $ct:tt $(+ $dt:tt )*) => {
+        impl<A, B: $ct $(+ $dt )*> $crate::functor::Functor<B> for $name<A> {
+            #[inline]
+            fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+                self.into_iter().map(f).collect::<$name<_>>()
+            }
+        }
+    };
+}
+
+impl<A, B> Functor<B> for PhantomData<A> {
+    #[inline]
+    fn map(self, _f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+        PhantomData::<B>
+    }
 }
 
 impl<A, B> Functor<B> for Option<A> {
@@ -238,10 +255,6 @@ if_std! {
     use std::hash::Hash;
     use std::vec::Vec;
 
-    functor_iter!(Vec);
-    functor_iter!(LinkedList);
-    functor_iter!(VecDeque);
-
     impl<A, B> Functor<B> for Box<A> {
         #[inline]
         fn map(self, mut f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
@@ -249,24 +262,10 @@ if_std! {
         }
     }
 
-    impl<A, B: Ord> Functor<B> for BinaryHeap<A> {
-        #[inline]
-        fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
-            self.into_iter().map(f).collect()
-        }
-    }
-
-    impl<A, B: Ord> Functor<B> for BTreeSet<A> {
-        #[inline]
-        fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
-            self.into_iter().map(f).collect()
-        }
-    }
-
-    impl<A, B: Eq + Hash> Functor<B> for HashSet<A> {
-        #[inline]
-        fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
-            self.into_iter().map(f).collect()
-        }
-    }
+    functor_iter!(Vec);
+    functor_iter!(LinkedList);
+    functor_iter!(VecDeque);
+    functor_iter!(BinaryHeap, Ord);
+    functor_iter!(BTreeSet, Ord);
+    functor_iter!(HashSet, Eq + Hash);
 }
