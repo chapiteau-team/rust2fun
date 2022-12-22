@@ -24,7 +24,7 @@ where
 }
 
 /// Covariant functor.
-pub trait Functor<MapB>: Invariant<MapB> {
+pub trait Functor<B>: Invariant<B> {
     /// Transform a `Self<A>` into a `Self<B>` by providing a transformation from `A` to `B`.
     ///
     /// # Examples
@@ -36,13 +36,13 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// let actual = x.map(|s| s.parse::<i32>().unwrap());
     /// assert_eq!(Some(1), actual);
     /// ```
-    fn map(self, f: impl FnMut(Self::Param) -> MapB) -> Self::Target<MapB>;
+    fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B>;
 
     /// Alias for [map] if the implementing type already had a built-in `.map` method.
     #[inline]
-    fn fmap<F>(self, f: F) -> Self::Target<MapB>
+    fn fmap<F>(self, f: F) -> Self::Target<B>
     where
-        F: FnMut(Self::Param) -> MapB,
+        F: FnMut(Self::Param) -> B,
         Self: Sized,
     {
         self.map(f)
@@ -60,11 +60,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!(Some((1, "1".to_string())), actual);
     /// ```
     #[inline]
-    fn fproduct<B, F>(self, mut f: F) -> Self::Target<(Self::Param, B)>
+    fn fproduct<F>(self, mut f: F) -> Self::Target<(Self::Param, B)>
     where
         F: FnMut(&Self::Param) -> B,
-        Self: Functor<(<Self as Higher>::Param, B), Target<(<Self as Higher>::Param, B)> = MapB>
-            + Sized,
+        Self: Functor<(<Self as Higher>::Param, B)> + Sized,
     {
         self.map(|a| {
             let rhs = f(&a);
@@ -84,11 +83,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!(Some(("1".to_string(), 1)), actual);
     /// ```
     #[inline]
-    fn fproduct_left<B, F>(self, mut f: F) -> Self::Target<(B, Self::Param)>
+    fn fproduct_left<F>(self, mut f: F) -> Self::Target<(B, Self::Param)>
     where
         F: FnMut(&Self::Param) -> B,
-        Self: Functor<(B, <Self as Higher>::Param), Target<(B, <Self as Higher>::Param)> = MapB>
-            + Sized,
+        Self: Functor<(B, <Self as Higher>::Param)> + Sized,
     {
         self.map(|a| (f(&a), a))
     }
@@ -104,10 +102,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!(Some("foo"), actual);
     /// ```
     #[inline]
-    fn map_const<B>(self, b: B) -> Self::Target<B>
+    fn map_const(self, b: B) -> Self::Target<B>
     where
         B: Copy,
-        Self: Functor<B, Target<B> = MapB> + Sized,
+        Self: Functor<B> + Sized,
     {
         self.map(constant1!(b))
     }
@@ -124,7 +122,7 @@ pub trait Functor<MapB>: Invariant<MapB> {
     #[inline]
     fn void(self) -> Self::Target<()>
     where
-        Self: Functor<(), Target<()> = MapB> + Sized,
+        Self: Functor<(), Target<()> = B> + Sized,
     {
         self.map_const(())
     }
@@ -139,11 +137,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!(Some(("foo", 1)), Some(1).tuple_left("foo"));
     /// ```
     #[inline]
-    fn tuple_left<B>(self, b: B) -> Self::Target<(B, Self::Param)>
+    fn tuple_left(self, b: B) -> Self::Target<(B, Self::Param)>
     where
         B: Copy,
-        Self: Functor<(B, <Self as Higher>::Param), Target<(B, <Self as Higher>::Param)> = MapB>
-            + Sized,
+        Self: Functor<(B, <Self as Higher>::Param)> + Sized,
     {
         self.map(|a| (b, a))
     }
@@ -158,11 +155,10 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!(Some((1, "foo")), Some(1).tuple_right("foo"));
     /// ```
     #[inline]
-    fn tuple_right<B>(self, b: B) -> Self::Target<(Self::Param, B)>
+    fn tuple_right(self, b: B) -> Self::Target<(Self::Param, B)>
     where
         B: Copy,
-        Self: Functor<(<Self as Higher>::Param, B), Target<(<Self as Higher>::Param, B)> = MapB>
-            + Sized,
+        Self: Functor<(<Self as Higher>::Param, B)> + Sized,
     {
         self.map(move |a| (a, b))
     }
@@ -178,11 +174,11 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!((Some(1), Some("foo")), Functor::unzip(x));
     /// ```
     #[inline]
-    fn unzip<A, B>(self) -> (Self::Target<A>, Self::Target<B>)
+    fn unzip<TA, TB>(self) -> (Self::Target<TA>, Self::Target<TB>)
     where
-        Self: Functor<A, Param = (A, B), Target<A> = MapB> + Functor<B> + Copy + Sized,
+        Self: Functor<TA, Param = (TA, TB), Target<TA> = B> + Functor<TB> + Copy + Sized,
     {
-        (self.map(|x: (A, B)| x.0), self.map(|x: (A, B)| x.1))
+        (self.map(|x| x.0), self.map(|x| x.1))
     }
 
     /// Lifts `if` to Functor.
@@ -197,11 +193,11 @@ pub trait Functor<MapB>: Invariant<MapB> {
     /// assert_eq!(Some(1), x.iff(constant!(1), constant!(0)));
     /// ```
     #[inline]
-    fn iff<A, T, F>(self, mut if_true: T, mut if_false: F) -> Self::Target<A>
+    fn iff<T, F>(self, mut if_true: T, mut if_false: F) -> Self::Target<B>
     where
-        T: FnMut() -> A,
-        F: FnMut() -> A,
-        Self: Functor<A, Param = bool, Target<A> = MapB> + Sized,
+        T: FnMut() -> B,
+        F: FnMut() -> B,
+        Self: Functor<B, Param = bool> + Sized,
     {
         self.map(|x| if x { if_true() } else { if_false() })
     }
@@ -213,16 +209,16 @@ macro_rules! functor_iter {
     ($name:ident) => {
         impl<A, B> $crate::functor::Functor<B> for $name<A> {
             #[inline]
-            fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
-                self.into_iter().map(f).collect::<$name<_>>()
+            fn map(self, f: impl FnMut(A) -> B) -> Self::Target<B> {
+                self.into_iter().map(f).collect::<$name<B>>()
             }
         }
     };
     ($name:ident, $ct:tt $(+ $dt:tt )*) => {
         impl<A, B: $ct $(+ $dt )*> $crate::functor::Functor<B> for $name<A> {
             #[inline]
-            fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
-                self.into_iter().map(f).collect::<$name<_>>()
+            fn map(self, f: impl FnMut(A) -> B) -> Self::Target<B> {
+                self.into_iter().map(f).collect::<$name<B>>()
             }
         }
     };
@@ -230,21 +226,21 @@ macro_rules! functor_iter {
 
 impl<A, B> Functor<B> for PhantomData<A> {
     #[inline]
-    fn map(self, _f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+    fn map(self, _f: impl FnMut(A) -> B) -> PhantomData<B> {
         PhantomData::<B>
     }
 }
 
 impl<A, B> Functor<B> for Option<A> {
     #[inline]
-    fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+    fn map(self, f: impl FnMut(A) -> B) -> Option<B> {
         self.map(f)
     }
 }
 
 impl<A, B, E> Functor<B> for Result<A, E> {
     #[inline]
-    fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+    fn map(self, f: impl FnMut(A) -> B) -> Result<B, E> {
         self.map(f)
     }
 }
@@ -257,7 +253,7 @@ if_std! {
 
     impl<A, B> Functor<B> for Box<A> {
         #[inline]
-        fn map(self, mut f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+        fn map(self, mut f: impl FnMut(A) -> B) -> Box<B> {
             Box::new(f(*self))
         }
     }

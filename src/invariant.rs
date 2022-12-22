@@ -6,7 +6,7 @@ use crate::functor::Functor;
 use crate::higher::Higher;
 
 /// Invariant functor (also known as exponential functor).
-pub trait Invariant<MapB>: Higher {
+pub trait Invariant<B>: Higher {
     /// Transform a `Self<A>` into a `Self<B>` by providing a transformation from `A` to `B`
     /// and one from `B` to `A`.
     ///
@@ -19,34 +19,34 @@ pub trait Invariant<MapB>: Higher {
     /// let actual = x.imap(|s| s.parse::<i32>().unwrap(), |i| i.to_string());
     /// assert_eq!(Some(1), actual);
     /// ```
-    fn imap<F, G>(self, f: F, g: G) -> Self::Target<MapB>
+    fn imap<F, G>(self, f: F, g: G) -> Self::Target<B>
     where
-        F: FnMut(Self::Param) -> MapB,
-        G: FnMut(MapB) -> Self::Param;
+        F: FnMut(Self::Param) -> B,
+        G: FnMut(B) -> Self::Param;
 }
 
 /// Macro to implement [Invariant] for types implementing [Functor].
 #[macro_export]
 macro_rules! invariant_functor {
     ($name:ident<$( $t:tt ),+>) => {
-        impl<InvariantB, $( $t ),+> $crate::invariant::Invariant<InvariantB> for $name<$( $t ),+> {
+        impl<B, $( $t ),+> $crate::invariant::Invariant<B> for $name<$( $t ),+> {
             #[inline]
-            fn imap<F, G>(self, f: F, _g: G) -> Self::Target<InvariantB>
+            fn imap<F, G>(self, f: F, _g: G) -> Self::Target<B>
             where
-                F: FnMut(Self::Param) -> InvariantB,
-                G: FnMut(InvariantB) -> Self::Param,
+                F: FnMut(Self::Param) -> B,
+                G: FnMut(B) -> Self::Param,
             {
                 self.fmap(f)
             }
         }
     };
     ($name:ident<$( $t:tt ),+>, $ct:tt $(+ $dt:tt )*) => {
-        impl<InvariantB:$ct $(+ $dt )*, $( $t ),+> $crate::invariant::Invariant<InvariantB> for $name<$( $t ),+> {
+        impl<B:$ct $(+ $dt )*, $( $t ),+> $crate::invariant::Invariant<B> for $name<$( $t ),+> {
             #[inline]
-            fn imap<F, G>(self, f: F, _g: G) -> Self::Target<InvariantB>
+            fn imap<F, G>(self, f: F, _g: G) -> Self::Target<B>
             where
-                F: FnMut(Self::Param) -> InvariantB,
-                G: FnMut(InvariantB) -> Self::Param,
+                F: FnMut(Self::Param) -> B,
+                G: FnMut(B) -> Self::Param,
             {
                 self.fmap(f)
             }
@@ -58,24 +58,24 @@ macro_rules! invariant_functor {
 #[macro_export]
 macro_rules! invariant_contravariant {
     ($name:ident<$( $t:tt ),+>) => {
-        impl<InvariantB, $( $t ),+> $crate::invariant::Invariant<InvariantB> for $name<$( $t ),+> {
+        impl<B, $( $t ),+> $crate::invariant::Invariant<B> for $name<$( $t ),+> {
             #[inline]
-            fn imap<F, G>(self, _f: F, g: G) -> Self::Target<InvariantB>
+            fn imap<F, G>(self, _f: F, g: G) -> Self::Target<B>
             where
-                F: FnMut(Self::Param) -> InvariantB,
-                G: FnMut(InvariantB) -> Self::Param,
+                F: FnMut(Self::Param) -> B,
+                G: FnMut(B) -> Self::Param,
             {
                 self.contramap(g)
             }
         }
     };
     ($name:ident<$( $t:tt ),+>, $ct:tt $(+ $dt:tt )*) => {
-        impl<InvariantB:$ct $(+ $dt )*, $( $t ),+> $crate::invariant::Invariant<InvariantB> for $name<$( $t ),+> {
+        impl<B:$ct $(+ $dt )*, $( $t ),+> $crate::invariant::Invariant<B> for $name<$( $t ),+> {
             #[inline]
-            fn imap<F, G>(self, _f: F, g: G) -> Self::Target<InvariantB>
+            fn imap<F, G>(self, _f: F, g: G) -> Self::Target<B>
             where
-                F: FnMut(Self::Param) -> InvariantB,
-                G: FnMut(InvariantB) -> Self::Param,
+                F: FnMut(Self::Param) -> B,
+                G: FnMut(B) -> Self::Param,
             {
                 self.contramap(g)
             }
@@ -85,7 +85,7 @@ macro_rules! invariant_contravariant {
 
 impl<A, B> Invariant<B> for PhantomData<A> {
     #[inline]
-    fn imap<F, G>(self, _f: F, _g: G) -> Self::Target<B>
+    fn imap<F, G>(self, _f: F, _g: G) -> PhantomData<B>
     where
         F: FnMut(Self::Param) -> B,
         G: FnMut(B) -> Self::Param,

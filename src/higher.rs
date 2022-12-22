@@ -26,6 +26,19 @@ pub trait Higher {
     type Param;
     /// Swapped higher type, i.e Target = Option<T>.
     type Target<T>: Higher<Param = T>;
+
+    /// Unsafe cast from one [Higher] type to another. This is a safe operation as long as the
+    /// resulting type is the same as the original type. Might be useful for building abstractions.
+    fn unsafe_cast<T, R>(self) -> R
+    where
+        Self: Higher<Param = T> + Sized,
+        R: Higher<Param = T>,
+    {
+        let ptr = &self as *const _ as *const R;
+        let result = unsafe { core::ptr::read_volatile(ptr) };
+        core::mem::forget(self);
+        result
+    }
 }
 
 /// Macro implementing `Higher` for a given type of kind `* -> *`.

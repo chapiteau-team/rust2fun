@@ -2,12 +2,11 @@ extern crate rust2fun_laws;
 
 use std::marker::PhantomData;
 
-use rust2fun_laws::contravariant_laws::{
-    contravariant_composition, contravariant_identity, lift_contravariant_composition,
-    lift_contravariant_identity,
-};
+use rust2fun_laws::apply_laws::*;
+use rust2fun_laws::contravariant_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
+use rust2fun_laws::semigroupal_laws::*;
 
 use crate::common::{parse, print};
 
@@ -46,4 +45,23 @@ fn test_contravariant() {
     let lift_contravariant_composition_for =
         |x| lift_contravariant_composition(x, parse::<i32>, print::<u32>);
     assert!(lift_contravariant_composition_for(PhantomData::<i32>).holds());
+}
+
+#[test]
+fn test_semigroupal() {
+    assert!(
+        semigroupal_associativity(PhantomData::<u32>, PhantomData::<u32>, PhantomData::<u32>)
+            .holds()
+    );
+}
+
+#[test]
+fn test_apply() {
+    let check_length = |x: &str, l: usize| x.len() == l;
+
+    assert!(
+        map2_product_consistency(PhantomData::<&str>, PhantomData::<usize>, check_length).holds()
+    );
+    assert!(product_r_consistency(PhantomData::<u32>, PhantomData::<u32>).holds());
+    assert!(product_l_consistency(PhantomData::<u32>, PhantomData::<u32>).holds());
 }

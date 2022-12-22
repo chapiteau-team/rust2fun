@@ -1,7 +1,9 @@
 extern crate rust2fun_laws;
 
+use rust2fun_laws::apply_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
+use rust2fun_laws::semigroupal_laws::*;
 
 use crate::common::{parse, print};
 
@@ -32,4 +34,35 @@ fn test_functor() {
     let lift_composition_for = |x| lift_composition(x, print, parse::<u8>);
     assert!(lift_composition_for(Err(true)).holds());
     assert!(lift_composition_for(Ok(1)).holds());
+}
+
+#[test]
+fn test_semigroupal() {
+    assert!(semigroupal_associativity(Ok::<_, ()>(1), Ok("ok".to_string()), Ok(true)).holds());
+    assert!(semigroupal_associativity(
+        Ok::<_, bool>(1),
+        Ok("ok".to_string()),
+        Err::<Option<()>, _>(false)
+    )
+    .holds());
+}
+
+#[test]
+fn test_apply() {
+    let check_length = |x: &str, l: usize| x.len() == l;
+
+    assert!(map2_product_consistency(Ok::<_, ()>("str"), Ok(1), check_length).holds());
+    assert!(map2_product_consistency(Ok("str"), Err(()), check_length).holds());
+    assert!(map2_product_consistency(Err(()), Ok(1), check_length).holds());
+    assert!(map2_product_consistency(Err(()), Err(()), check_length).holds());
+
+    assert!(product_r_consistency(Ok::<_, ()>("str"), Ok(1)).holds());
+    assert!(product_r_consistency(Ok("str"), Err::<i32, _>(())).holds());
+    assert!(product_r_consistency(Err::<i32, _>(()), Ok(1)).holds());
+    assert!(product_r_consistency(Err::<i32, _>(()), Err::<i32, _>(())).holds());
+
+    assert!(product_l_consistency(Ok::<_, ()>("str"), Ok(1)).holds());
+    assert!(product_l_consistency(Ok("str"), Err::<i32, _>(())).holds());
+    assert!(product_l_consistency(Err::<i32, _>(()), Ok(1)).holds());
+    assert!(product_l_consistency(Err::<i32, _>(()), Err::<i32, _>(())).holds());
 }

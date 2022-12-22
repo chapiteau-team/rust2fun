@@ -23,7 +23,7 @@ where
 }
 
 /// Contravariant functor.
-pub trait Contravariant<MapB>: Invariant<MapB> {
+pub trait Contravariant<B>: Invariant<B> {
     /// Transform a `Self<A>` into a `Self<B>` by providing a transformation from `B` to `A`.
     ///
     /// # Examples
@@ -36,12 +36,12 @@ pub trait Contravariant<MapB>: Invariant<MapB> {
     /// let actual = x.contramap(|x: String| x.parse::<i32>().unwrap());
     /// assert_eq!(PhantomData::<String>, actual);
     /// ```
-    fn contramap(self, f: impl FnMut(MapB) -> Self::Param) -> Self::Target<MapB>;
+    fn contramap(self, f: impl FnMut(B) -> Self::Param) -> Self::Target<B>;
 }
 
 impl<A, B> Contravariant<B> for PhantomData<A> {
     #[inline]
-    fn contramap(self, _f: impl FnMut(B) -> Self::Param) -> Self::Target<B> {
+    fn contramap(self, _f: impl FnMut(B) -> Self::Param) -> PhantomData<B> {
         PhantomData::<B>
     }
 }
