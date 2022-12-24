@@ -1,5 +1,6 @@
 extern crate rust2fun_laws;
 
+use rust2fun_laws::applicative_laws::*;
 use rust2fun_laws::apply_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
@@ -65,4 +66,20 @@ fn test_apply() {
     assert!(product_l_consistency(Ok("str"), Err::<i32, _>(())).holds());
     assert!(product_l_consistency(Err::<i32, _>(()), Ok(1)).holds());
     assert!(product_l_consistency(Err::<i32, _>(()), Err::<i32, _>(())).holds());
+}
+
+#[test]
+fn test_applicative() {
+    assert!(applicative_identity(Ok::<_, ()>(1)).holds());
+    assert!(applicative_identity(Err::<i32, _>(false)).holds());
+
+    assert!(applicative_homomorphism::<Result<_, ()>, _, _>(1, print).holds());
+
+    assert!(applicative_map(Ok::<_, ()>(1), print).holds());
+    assert!(applicative_map(Err(()), print::<i32>).holds());
+
+    assert!(ap_product_consistent(Err(false), Ok(print::<i32>)).holds());
+    assert!(ap_product_consistent(Ok::<_, bool>(1), Ok(print)).holds());
+
+    assert!(applicative_unit::<Result<_, ()>>(1).holds());
 }

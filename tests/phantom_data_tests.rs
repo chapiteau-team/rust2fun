@@ -2,6 +2,7 @@ extern crate rust2fun_laws;
 
 use std::marker::PhantomData;
 
+use rust2fun_laws::applicative_laws::*;
 use rust2fun_laws::apply_laws::*;
 use rust2fun_laws::contravariant_laws::*;
 use rust2fun_laws::functor_laws::*;
@@ -64,4 +65,13 @@ fn test_apply() {
     );
     assert!(product_r_consistency(PhantomData::<u32>, PhantomData::<u32>).holds());
     assert!(product_l_consistency(PhantomData::<u32>, PhantomData::<u32>).holds());
+}
+
+#[test]
+fn test_applicative() {
+    assert!(applicative_identity(PhantomData::<u32>).holds());
+    assert!(applicative_homomorphism::<PhantomData<_>, _, _>(1, print).holds());
+    assert!(applicative_map(PhantomData::<i32>, print).holds());
+    assert!(ap_product_consistent(PhantomData::<i32>, PhantomData::<fn(i32) -> String>).holds());
+    assert!(applicative_unit::<PhantomData<_>>(1).holds());
 }

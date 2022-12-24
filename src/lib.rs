@@ -18,6 +18,7 @@ macro_rules! if_std {
     ( $( $code:tt )* ) => {};
 }
 
+pub mod applicative;
 pub mod apply;
 pub mod combinator;
 pub mod contravariant;
@@ -28,6 +29,7 @@ pub mod semigroupal;
 
 /// Convenience re-export of common members of the library.
 pub mod prelude {
+    pub use crate::applicative::*;
     pub use crate::apply::*;
     pub use crate::combinator::*;
     pub use crate::contravariant::*;

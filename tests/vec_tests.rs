@@ -3,6 +3,9 @@ mod common;
 if_std! {
     extern crate rust2fun_laws;
 
+    use rust2fun::prelude::*;
+
+    use rust2fun_laws::applicative_laws::*;
     use rust2fun_laws::apply_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
@@ -82,5 +85,14 @@ if_std! {
         assert!(product_l_consistency(Vec::<&str>::default(), Vec::<usize>::default()).holds());
         assert!(product_l_consistency(Vec::from(["some"]), Vec::from([4])).holds());
         assert!(product_l_consistency(Vec::from(["some", "other"]), Vec::from([4, 5])).holds());
+    }
+
+    #[test]
+    fn test_applicative() {
+        assert!(applicative_identity(Vec::pure(1)).holds());
+        assert!(applicative_homomorphism::<Vec<_>, _, _>(1, print).holds());
+        assert!(applicative_map(Vec::pure(1), print).holds());
+        assert!(ap_product_consistent(Vec::pure(1), Vec::pure(print)).holds());
+        assert!(applicative_unit::<Vec<_>>(1).holds());
     }
 }
