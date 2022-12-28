@@ -110,4 +110,15 @@ if_std! {
     invariant_functor!(BinaryHeap<T>, Ord);
     invariant_functor!(BTreeSet<T>, Ord);
     invariant_functor!(HashSet<T>, Hash + Eq);
+
+    impl<A, B, K: Hash + Eq> Invariant<B> for HashMap<K, A> {
+        #[inline]
+        fn imap<F, G>(self, mut f: F, _g: G) -> HashMap<K, B>
+        where
+            F: FnMut(Self::Param) -> B,
+            G: FnMut(B) -> Self::Param,
+        {
+            self.into_iter().map(|(k, v)| (k, f(v))).collect()
+        }
+    }
 }

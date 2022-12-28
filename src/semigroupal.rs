@@ -91,4 +91,13 @@ if_std! {
     semigroupal_iter!(BinaryHeap, Ord);
     semigroupal_iter!(BTreeSet, Ord);
     semigroupal_iter!(HashSet, Eq + Hash);
+
+    impl<A, B, K: Eq + Hash> Semigroupal<B> for HashMap<K, A> {
+        #[inline]
+        fn product(self, mut fb: HashMap<K, B>) -> HashMap<K, (A, B)> {
+            self.into_iter()
+                .filter_map(|(k, a)| fb.remove(&k).map(|b| (k, (a, b))))
+                .collect()
+        }
+    }
 }

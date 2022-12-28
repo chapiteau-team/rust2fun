@@ -165,4 +165,16 @@ if_std! {
     apply_iter!(BinaryHeap, Ord);
     apply_iter!(BTreeSet, Ord);
     apply_iter!(HashSet, Eq + Hash);
+
+    impl<A, B, K: Eq + Hash> Apply<B> for HashMap<K, A> {
+        #[inline]
+        fn ap<F>(self, mut ff: HashMap<K, F>) -> HashMap<K, B>
+        where
+            F: FnMut(A) -> B,
+        {
+            self.into_iter()
+                .filter_map(|(k, a)| ff.remove(&k).map(|mut f| (k, f(a))))
+                .collect()
+        }
+    }
 }

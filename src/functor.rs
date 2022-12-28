@@ -264,4 +264,11 @@ if_std! {
     functor_iter!(BinaryHeap, Ord);
     functor_iter!(BTreeSet, Ord);
     functor_iter!(HashSet, Eq + Hash);
+
+    impl<A, B, K: Eq + Hash> Functor<B> for HashMap<K, A> {
+        #[inline]
+        fn map(self, mut f: impl FnMut(A) -> B) -> HashMap<K, B> {
+            self.into_iter().map(|(k, v)| (k, f(v))).collect()
+        }
+    }
 }

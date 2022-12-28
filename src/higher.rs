@@ -93,4 +93,9 @@ if_std! {
     higher!(BTreeSet);
     higher!(VecDeque);
     higher!(HashSet);
+
+    impl<K, V> Higher for HashMap<K, V> {
+        type Param = V;
+        type Target<T> = HashMap<K, T>;
+    }
 }
