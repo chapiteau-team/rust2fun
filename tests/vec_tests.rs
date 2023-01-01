@@ -10,6 +10,7 @@ if_std! {
     use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
+    use rust2fun_laws::monad_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
 
     use crate::common::{parse, print};
@@ -109,5 +110,12 @@ if_std! {
         assert!(flat_map_consistent_apply(Vec::pure(1), Vec::pure(print)).holds());
 
         assert!(m_product_consistency(Vec::pure(1), |x| Vec::pure(print(x))).holds());
+    }
+
+    #[test]
+    fn test_monad() {
+        assert!(monad_left_identity::<Vec<_>, _, _>(1, |x| Vec::pure(print(x))).holds());
+        assert!(monad_right_identity(Vec::pure(1)).holds());
+        assert!(map_flat_map_coherence(Vec::pure(1), print).holds());
     }
 }

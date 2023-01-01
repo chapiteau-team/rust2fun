@@ -8,6 +8,7 @@ if_std! {
     use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
+    use rust2fun_laws::monad_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
 
     use crate::common::{parse, print};
@@ -59,5 +60,12 @@ if_std! {
         assert!(flat_map_associativity(Box::new(1), |x| Box::new(x + 1), |x| Box::new(x + 2)).holds());
         assert!(flat_map_consistent_apply(Box::new(1), Box::new(print)).holds());
         assert!(m_product_consistency(Box::new(1), |x| Box::new(x + 1)).holds());
+    }
+
+    #[test]
+    fn test_monad() {
+        assert!(monad_left_identity::<Box<_>, _, _>(1, |x| Box::new(x + 1)).holds());
+        assert!(monad_right_identity(Box::new(1)).holds());
+        assert!(map_flat_map_coherence(Box::new(1), |x| x + 1).holds());
     }
 }

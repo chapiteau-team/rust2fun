@@ -5,6 +5,7 @@ use rust2fun_laws::apply_laws::*;
 use rust2fun_laws::flatmap_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
+use rust2fun_laws::monad_laws::*;
 use rust2fun_laws::semigroupal_laws::*;
 
 use crate::common::{parse, print};
@@ -96,4 +97,16 @@ fn test_flatmap() {
 
     assert!(m_product_consistency(None, |x: u32| Some(print(x))).holds());
     assert!(m_product_consistency(Some(1), |x: u32| Some(print(x))).holds());
+}
+
+#[test]
+fn test_monad() {
+    assert!(monad_left_identity::<Option<_>, _, _>(1, |_| None::<String>).holds());
+    assert!(monad_left_identity::<Option<_>, _, _>(1, |x| Some(print(x))).holds());
+
+    assert!(monad_right_identity(None::<i32>).holds());
+    assert!(monad_right_identity(Some(1)).holds());
+
+    assert!(map_flat_map_coherence(None, print::<i32>).holds());
+    assert!(map_flat_map_coherence(Some(1), print).holds());
 }

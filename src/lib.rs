@@ -26,6 +26,7 @@ pub mod flatmap;
 pub mod functor;
 pub mod higher;
 pub mod invariant;
+pub mod monad;
 pub mod semigroupal;
 
 /// Convenience re-export of common members of the library.
@@ -38,5 +39,6 @@ pub mod prelude {
     pub use crate::functor::*;
     pub use crate::higher::*;
     pub use crate::invariant::*;
+    pub use crate::monad::*;
     pub use crate::semigroupal::*;
 }
