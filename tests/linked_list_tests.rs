@@ -9,6 +9,7 @@ if_std! {
 
     use rust2fun_laws::applicative_laws::*;
     use rust2fun_laws::apply_laws::*;
+    use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
@@ -96,5 +97,19 @@ if_std! {
         assert!(applicative_map(LinkedList::pure(1), print).holds());
         assert!(ap_product_consistent(LinkedList::pure(1), LinkedList::pure(print)).holds());
         assert!(applicative_unit::<LinkedList<_>>(1).holds());
+    }
+
+    #[test]
+    fn test_flatmap() {
+        assert!(flat_map_associativity(
+            LinkedList::pure(1),
+            |x| LinkedList::pure(print(x)),
+            |x| LinkedList::pure(parse::<i32>(x))
+        )
+        .holds());
+
+        assert!(flat_map_consistent_apply(LinkedList::pure(1), LinkedList::pure(print)).holds());
+
+        assert!(m_product_consistency(LinkedList::pure(1), |x| LinkedList::pure(print(x))).holds());
     }
 }

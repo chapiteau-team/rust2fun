@@ -160,7 +160,7 @@ pub trait Functor<B>: Invariant<B> {
         B: Copy,
         Self: Functor<(<Self as Higher>::Param, B)> + Sized,
     {
-        self.map(move |a| (a, b))
+        self.map(|a| (a, b))
     }
 
     /// Un-zips an `Self<(A, B)>` consisting of element pairs into two separate Self's tupled.
@@ -174,26 +174,26 @@ pub trait Functor<B>: Invariant<B> {
     /// assert_eq!((Some(1), Some("foo")), Functor::unzip(x));
     /// ```
     #[inline]
-    fn unzip<TA, TB>(self) -> (Self::Target<TA>, Self::Target<TB>)
+    fn unzip<A>(self) -> (Self::Target<A>, Self::Target<B>)
     where
-        Self: Functor<TA, Param = (TA, TB), Target<TA> = B> + Functor<TB> + Copy + Sized,
+        Self: Higher<Param = (A, B)> + Functor<A> + Functor<B> + Copy + Sized,
     {
         (self.map(|x| x.0), self.map(|x| x.1))
     }
 
-    /// Lifts `if` to Functor.
+    /// `if` lifted into Functor.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rust2fun::{constant, constant1};
+    /// use rust2fun::constant;
     /// use rust2fun::prelude::*;
     ///
     /// let x = Some(true);
-    /// assert_eq!(Some(1), x.iff(constant!(1), constant!(0)));
+    /// assert_eq!(Some(1), x.if_f(constant!(1), constant!(0)));
     /// ```
     #[inline]
-    fn iff<T, F>(self, mut if_true: T, mut if_false: F) -> Self::Target<B>
+    fn if_f<T, F>(self, mut if_true: T, mut if_false: F) -> Self::Target<B>
     where
         T: FnMut() -> B,
         F: FnMut() -> B,

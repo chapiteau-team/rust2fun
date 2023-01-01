@@ -6,6 +6,7 @@ if_std! {
     use std::collections::HashMap;
 
     use rust2fun_laws::apply_laws::*;
+    use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
@@ -51,5 +52,23 @@ if_std! {
         .holds());
         assert!(product_r_consistency(HashMap::from([(1, "str")]), HashMap::from([(1, 1)])).holds());
         assert!(product_l_consistency(HashMap::from([(1, "str")]), HashMap::from([(1, 1)])).holds());
+    }
+
+    #[test]
+    fn test_flatmap() {
+        assert!(flat_map_associativity(
+            HashMap::from([(1, 1)]),
+            |x| HashMap::from([(1, print(x))]),
+            |x| HashMap::from([(1, parse::<i32>(x))])
+        )
+        .holds());
+
+        assert!(
+            flat_map_consistent_apply(HashMap::from([(1, 1)]), HashMap::from([(1, print)])).holds()
+        );
+
+        assert!(
+            m_product_consistency(HashMap::from([(1, 1)]), |x| HashMap::from([(1, print(x))])).holds()
+        );
     }
 }

@@ -7,6 +7,7 @@ if_std! {
 
     use rust2fun_laws::applicative_laws::*;
     use rust2fun_laws::apply_laws::*;
+    use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
@@ -94,5 +95,19 @@ if_std! {
         assert!(applicative_map(Vec::pure(1), print).holds());
         assert!(ap_product_consistent(Vec::pure(1), Vec::pure(print)).holds());
         assert!(applicative_unit::<Vec<_>>(1).holds());
+    }
+
+    #[test]
+    fn test_flatmap() {
+        assert!(flat_map_associativity(
+            Vec::pure(1),
+            |x| Vec::pure(print(x)),
+            |x| Vec::pure(parse::<i32>(x))
+        )
+        .holds());
+
+        assert!(flat_map_consistent_apply(Vec::pure(1), Vec::pure(print)).holds());
+
+        assert!(m_product_consistency(Vec::pure(1), |x| Vec::pure(print(x))).holds());
     }
 }

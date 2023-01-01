@@ -2,6 +2,7 @@ extern crate rust2fun_laws;
 
 use rust2fun_laws::applicative_laws::*;
 use rust2fun_laws::apply_laws::*;
+use rust2fun_laws::flatmap_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
 use rust2fun_laws::semigroupal_laws::*;
@@ -81,4 +82,18 @@ fn test_applicative() {
     assert!(ap_product_consistent(Some(1), Some(print)).holds());
 
     assert!(applicative_unit::<Option<_>>(1).holds());
+}
+
+#[test]
+fn test_flatmap() {
+    assert!(
+        flat_map_associativity(None, |x: u32| Some(print(x)), |s| Some(parse::<i32>(s))).holds()
+    );
+    assert!(flat_map_associativity(Some(1), |x| Some(print(x)), |s| Some(parse::<i32>(s))).holds());
+
+    assert!(flat_map_consistent_apply(None, Some(print::<i32>)).holds());
+    assert!(flat_map_consistent_apply(Some(1), Some(print)).holds());
+
+    assert!(m_product_consistency(None, |x: u32| Some(print(x))).holds());
+    assert!(m_product_consistency(Some(1), |x: u32| Some(print(x))).holds());
 }

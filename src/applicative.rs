@@ -44,7 +44,7 @@ where
 
 impl<A> Applicative for PhantomData<A> {
     #[inline]
-    fn pure(_x: Self::Param) -> Self {
+    fn pure(_x: A) -> Self {
         PhantomData
     }
 }
@@ -58,7 +58,7 @@ impl<A> Applicative for Option<A> {
 
 impl<A, E> Applicative for Result<A, E> {
     #[inline]
-    fn pure(x: Self::Param) -> Self {
+    fn pure(x: A) -> Self {
         Ok(x)
     }
 }
@@ -72,21 +72,21 @@ if_std! {
 
     impl<A> Applicative for Box<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             Box::new(x)
         }
     }
 
     impl<A> Applicative for Vec<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             vec![x]
         }
     }
 
     impl<A> Applicative for LinkedList<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             let mut result = LinkedList::new();
             result.push_back(x);
             result
@@ -95,7 +95,7 @@ if_std! {
 
     impl<A> Applicative for VecDeque<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             let mut result = VecDeque::new();
             result.push_back(x);
             result
@@ -104,7 +104,7 @@ if_std! {
 
     impl<A: Ord> Applicative for BinaryHeap<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             let mut result = BinaryHeap::new();
             result.push(x);
             result
@@ -113,7 +113,7 @@ if_std! {
 
     impl<A: Ord> Applicative for BTreeSet<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             let mut result = BTreeSet::new();
             result.insert(x);
             result
@@ -122,7 +122,7 @@ if_std! {
 
     impl<A: Eq + Hash> Applicative for HashSet<A> {
         #[inline]
-        fn pure(x: Self::Param) -> Self {
+        fn pure(x: A) -> Self {
             let mut result = HashSet::new();
             result.insert(x);
             result

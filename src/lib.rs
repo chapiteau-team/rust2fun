@@ -22,6 +22,7 @@ pub mod applicative;
 pub mod apply;
 pub mod combinator;
 pub mod contravariant;
+pub mod flatmap;
 pub mod functor;
 pub mod higher;
 pub mod invariant;
@@ -33,6 +34,7 @@ pub mod prelude {
     pub use crate::apply::*;
     pub use crate::combinator::*;
     pub use crate::contravariant::*;
+    pub use crate::flatmap::*;
     pub use crate::functor::*;
     pub use crate::higher::*;
     pub use crate::invariant::*;
