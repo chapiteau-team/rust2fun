@@ -13,14 +13,14 @@ use crate::invariant::Invariant;
 /// ```
 /// use rust2fun::prelude::*;
 ///
-/// let f = lift(|x: i32| x + 1);
+/// let mut f = lift(|x: i32| x + 1);
 /// assert_eq!(Some(2), f(Some(1)));
 /// ```
-pub fn lift<FA, B>(f: impl FnMut(FA::Param) -> B) -> impl FnOnce(FA) -> FA::Target<B>
+pub fn lift<FA, B>(mut f: impl FnMut(FA::Param) -> B) -> impl FnMut(FA) -> FA::Target<B>
 where
     FA: Functor<B>,
 {
-    |fa: FA| fa.map(f)
+    move |fa: FA| fa.map(&mut f)
 }
 
 /// Covariant functor.
@@ -227,7 +227,7 @@ macro_rules! functor_iter {
 impl<A, B> Functor<B> for PhantomData<A> {
     #[inline]
     fn map(self, _f: impl FnMut(A) -> B) -> PhantomData<B> {
-        PhantomData::<B>
+        PhantomData
     }
 }
 

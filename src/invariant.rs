@@ -90,7 +90,7 @@ impl<A, B> Invariant<B> for PhantomData<A> {
         F: FnMut(Self::Param) -> B,
         G: FnMut(B) -> Self::Param,
     {
-        PhantomData::<B>
+        PhantomData
     }
 }
 

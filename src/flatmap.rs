@@ -60,11 +60,11 @@ pub trait FlatMap<B>: Apply<B> {
     where
         F: FnMut(Self::Param) -> Self::Target<B>,
         Self: FlatMap<(<Self as Higher>::Param, B)> + Sized,
-        Self::Param: Clone,
+        Self::Param: Copy,
         Self::Target<B>:
             Functor<(Self::Param, B), Target<(Self::Param, B)> = Self::Target<(Self::Param, B)>>,
     {
-        self.flat_map(|a| f(a.clone()).map(|b| (a.clone(), b)))
+        self.flat_map(|a| f(a).map(|b| (a, b)))
     }
 
     /// `if` lifted into monad.
@@ -101,7 +101,7 @@ pub trait FlatMap<B>: Apply<B> {
     where
         F: FnMut(Self::Param) -> Self::Target<B>,
         Self: FlatMap<<Self as Higher>::Param, Target<<Self as Higher>::Param> = Self> + Sized,
-        Self::Param: Clone,
+        Self::Param: Copy,
         Self::Target<B>: Functor<Self::Param, Target<Self::Param> = Self>,
     {
         fn internal<FA: FlatMap<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA>>(
@@ -111,7 +111,7 @@ pub trait FlatMap<B>: Apply<B> {
             fa.flat_map(g)
         }
 
-        internal(self, |a| f(a.clone()).map(constant1!(a.clone())))
+        internal(self, |a| f(a).map(constant1!(a)))
     }
 }
 
@@ -149,7 +149,7 @@ impl<A, B> FlatMap<B> for PhantomData<A> {
     where
         F: FnMut(A) -> PhantomData<B>,
     {
-        PhantomData::<B>
+        PhantomData
     }
 }
 
@@ -157,7 +157,7 @@ impl<A, B> FlatMap<B> for Option<A> {
     #[inline]
     fn flat_map<F>(self, f: F) -> Option<B>
     where
-        F: FnOnce(A) -> Option<B>,
+        F: FnMut(A) -> Option<B>,
     {
         self.and_then(f)
     }
@@ -167,7 +167,7 @@ impl<A, B, E> FlatMap<B> for Result<A, E> {
     #[inline]
     fn flat_map<F>(self, f: F) -> Result<B, E>
     where
-        F: FnOnce(A) -> Result<B, E>,
+        F: FnMut(A) -> Result<B, E>,
     {
         self.and_then(f)
     }

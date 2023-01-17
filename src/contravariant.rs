@@ -12,14 +12,14 @@ use crate::invariant::Invariant;
 /// use std::marker::PhantomData;
 /// use rust2fun::prelude::*;
 ///
-/// let f = lift_contravariant(|x: i32| x.to_string());
+/// let mut f = lift_contravariant(|x: i32| x.to_string());
 /// assert_eq!(PhantomData::<i32>, f(PhantomData::<String>));
 /// ```
-pub fn lift_contravariant<FA, B>(f: impl FnMut(B) -> FA::Param) -> impl FnOnce(FA) -> FA::Target<B>
+pub fn lift_contravariant<FA, B>(mut f: impl FnMut(B) -> FA::Param) -> impl FnMut(FA) -> FA::Target<B>
 where
     FA: Contravariant<B>,
 {
-    |fa: FA| fa.contramap(f)
+    move |fa: FA| fa.contramap(&mut f)
 }
 
 /// Contravariant functor.
@@ -42,6 +42,6 @@ pub trait Contravariant<B>: Invariant<B> {
 impl<A, B> Contravariant<B> for PhantomData<A> {
     #[inline]
     fn contramap(self, _f: impl FnMut(B) -> Self::Param) -> PhantomData<B> {
-        PhantomData::<B>
+        PhantomData
     }
 }

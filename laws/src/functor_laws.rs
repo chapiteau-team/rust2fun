@@ -29,7 +29,7 @@ pub fn lift_identity<FA>(fa: FA) -> IsEq<FA>
 where
     FA: Functor<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
 {
-    let f = lift(id);
+    let mut f = lift(id);
     IsEq::equal_under_law(fa.clone(), f(fa))
 }
 
@@ -45,10 +45,12 @@ where
     FB: Functor<FC::Param, Target<FC::Param> = FC>,
     FC: Higher + Eq,
 {
-    let ff = lift(&mut f);
-    let fg = lift(&mut g);
-    let lhs = fg(ff(fa.clone()));
-    let lgf = lift(compose!(g, f));
+    let lhs = {
+        let mut ff = lift(&mut f);
+        let mut fg = lift(&mut g);
+        fg(ff(fa.clone()))
+    };
+    let mut lgf = lift(compose!(g, f));
     let rhs = lgf(fa);
     IsEq::equal_under_law(lhs, rhs)
 }

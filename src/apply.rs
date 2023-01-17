@@ -16,13 +16,39 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// use rust2fun::prelude::*;
     ///
     /// let f = Some(|x: i32| x.to_string());
-    /// let x = Some(1);
-    /// let actual = x.ap(f);
-    /// assert_eq!(Some("1".to_string()), actual);
+    /// assert_eq!(Some("1".to_string()), f.ap(Some(1)));
+    /// assert_eq!(Some("2".to_string()), f.ap(Some(2)));
     /// ```
-    fn ap<F>(self, ff: Self::Target<F>) -> Self::Target<B>
+    fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
     where
-        F: FnMut(Self::Param) -> B;
+        Self::Param: FnMut(A) -> B;
+
+    /// Is a binary version of [ap].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rust2fun::prelude::*;
+    ///
+    /// let f = Some(|x, y| x + y);
+    /// assert_eq!(Some(3), f.ap2(Some(1), Some(2)));
+    /// ```
+    fn ap2<A, Z>(self, fa: Self::Target<A>, fb: Self::Target<B>) -> Self::Target<Z>
+    where
+        Self::Target<(Self::Param, B)>: Semigroupal<A, Target<A> = Self::Target<A>>
+            + Higher<
+                Target<(<Self::Target<(Self::Param, B)> as Higher>::Param, A)> = Self::Target<(
+                    <Self::Target<(Self::Param, B)> as Higher>::Param,
+                    A,
+                )>,
+            >,
+        Self::Target<(<Self::Target<(Self::Param, B)> as Higher>::Param, A)>:
+            Functor<Z, Target<Z> = Self::Target<Z>>,
+        Self: Sized,
+        Self::Param: FnMut(A, B) -> Z,
+    {
+        self.product(fb).product(fa).map(|((mut f, b), a)| f(a, b))
+    }
 
     /// Combine two effectful values into a single effectful value using a binary function.
     ///
@@ -90,56 +116,62 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
 #[macro_export]
 macro_rules! apply_iter {
     ($name:ident) => {
-        impl<A, B> $crate::apply::Apply<B> for $name<A> {
+        impl<F, B> $crate::apply::Apply<B> for $name<F> {
             #[inline]
-            fn ap<F>(self, ff: Self::Target<F>) -> Self::Target<B>
+            fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
             where
-                F: FnMut(A) -> B,
+                Self::Param: FnMut(A) -> B,
             {
-                self.into_iter().zip(ff).map(|(a, mut f)| f(a)).collect::<$name<B>>()
+                self.into_iter()
+                    .zip(fa)
+                    .map(|(mut f, a)| f(a))
+                    .collect::<$name<B>>()
             }
         }
     };
     ($name:ident, $ct:tt $(+ $dt:tt )*) => {
-        impl<A: $ct $(+ $dt )*, B: $ct $(+ $dt )*> $crate::apply::Apply<B> for $name<A> {
+        impl<F: $ct $(+ $dt )*, B: $ct $(+ $dt )*> $crate::apply::Apply<B> for $name<F> {
             #[inline]
-            fn ap<F>(self, ff: Self::Target<F>) -> Self::Target<B>
+            fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
             where
-                F: FnMut(A) -> B,
+                Self::Param: FnMut(A) -> B,
             {
-                self.into_iter().zip(ff).map(|(a, mut f)| f(a)).collect::<$name<B>>()
+                self.into_iter()
+                    .zip(fa)
+                    .map(|(mut f, a)| f(a))
+                    .collect::<$name<B>>()
             }
         }
     };
 }
 
-impl<A, B> Apply<B> for PhantomData<A> {
+impl<F, B> Apply<B> for PhantomData<F> {
     #[inline]
-    fn ap<F>(self, _ff: PhantomData<F>) -> PhantomData<B>
+    fn ap<A>(self, _fa: PhantomData<A>) -> PhantomData<B>
     where
-        F: FnMut(A) -> B,
+        Self::Param: FnMut(A) -> B,
     {
-        PhantomData::<B>
+        PhantomData
     }
 }
 
-impl<A, B> Apply<B> for Option<A> {
+impl<F, B> Apply<B> for Option<F> {
     #[inline]
-    fn ap<F>(self, ff: Option<F>) -> Option<B>
+    fn ap<A>(self, fa: Option<A>) -> Option<B>
     where
-        F: FnMut(A) -> B,
+        Self::Param: FnMut(A) -> B,
     {
-        self.and_then(|a| ff.map(|mut f: F| f(a)))
+        fa.and_then(|a| self.map(|mut f| f(a)))
     }
 }
 
-impl<A, B, E> Apply<B> for Result<A, E> {
+impl<F, B, E> Apply<B> for Result<F, E> {
     #[inline]
-    fn ap<F>(self, ff: Result<F, E>) -> Result<B, E>
+    fn ap<A>(self, fa: Result<A, E>) -> Result<B, E>
     where
-        F: FnMut(A) -> B,
+        Self::Param: FnMut(A) -> B,
     {
-        self.and_then(|a| ff.map(|mut f: F| f(a)))
+        fa.and_then(|a| self.map(|mut f| f(a)))
     }
 }
 
@@ -149,13 +181,13 @@ if_std! {
     use std::hash::Hash;
     use std::vec::Vec;
 
-    impl<A, B> Apply<B> for Box<A> {
+    impl<F, B> Apply<B> for Box<F> {
         #[inline]
-        fn ap<F>(self, mut ff: Box<F>) -> Box<B>
+        fn ap<A>(mut self, fa: Box<A>) -> Box<B>
         where
-            F: FnMut(A) -> B,
+            Self::Param: FnMut(A) -> B,
         {
-            Box::new((*ff)(*self))
+            Box::new((*self)(*fa))
         }
     }
 
@@ -166,14 +198,14 @@ if_std! {
     apply_iter!(BTreeSet, Ord);
     apply_iter!(HashSet, Eq + Hash);
 
-    impl<A, B, K: Eq + Hash> Apply<B> for HashMap<K, A> {
+    impl<F, B, K: Eq + Hash> Apply<B> for HashMap<K, F> {
         #[inline]
-        fn ap<F>(self, mut ff: HashMap<K, F>) -> HashMap<K, B>
+        fn ap<A>(mut self, fa: HashMap<K, A>) -> HashMap<K, B>
         where
-            F: FnMut(A) -> B,
+            Self::Param: FnMut(A) -> B,
         {
-            self.into_iter()
-                .filter_map(|(k, a)| ff.remove(&k).map(|mut f| (k, f(a))))
+            fa.into_iter()
+                .filter_map(|(k, a)| self.remove(&k).map(|mut f| (k, f(a))))
                 .collect()
         }
     }
