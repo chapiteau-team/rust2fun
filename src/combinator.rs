@@ -3,6 +3,8 @@
 //! A combinator is a higher-order function that uses only function application and earlier defined
 //! combinators to define a result from its arguments.
 
+use rust2fun_macros::{constant_arity, curry_arity};
+
 /// Compose functions.
 ///
 /// (f ∘ g ∘ h)(x) = f(g(h(x)))
@@ -60,6 +62,35 @@ macro_rules! pipe {
         $single
     };
 }
+
+/// Curry a function of two arguments. The first argument is applied to the function. The second
+/// argument is returned as a closure. The returned closure can be applied to the second argument.
+/// The result is the same as applying the function to both arguments.
+///
+/// # Example
+///
+/// ```
+/// use rust2fun::curry2;
+///
+/// let g = curry2!(Option::map);
+///
+/// let actual = g(Some(1))(|x| x + 1);
+/// assert_eq!(Some(2), actual);
+/// ```
+#[macro_export]
+macro_rules! curry2 {
+    ($f:expr) => {
+        move |x| move |y| $f(x, y)
+    };
+}
+
+curry_arity!(3);
+curry_arity!(4);
+curry_arity!(5);
+curry_arity!(6);
+curry_arity!(7);
+curry_arity!(8);
+curry_arity!(9);
 
 /// Flip arguments of a function *flip(f)(x, y) = f(y, x)* also known as C (Cardinal) combinator.
 ///
@@ -129,6 +160,14 @@ macro_rules! constant2 {
         |_, _| $x
     };
 }
+
+constant_arity!(3);
+constant_arity!(4);
+constant_arity!(5);
+constant_arity!(6);
+constant_arity!(7);
+constant_arity!(8);
+constant_arity!(9);
 
 /// The identity function *id(x) = x* also known as I (Idiot) combinator.
 ///

@@ -1,4 +1,67 @@
-//! Applicative is a stronger version of Apply that has pure.
+//! Applicative functor.
+//! Allows application of a function in an Applicative context to a value in an Applicative context.
+//!
+//! # Examples
+//!
+//! ```
+//! use rust2fun::curry3;
+//! use rust2fun::prelude::*;
+//!
+//! # struct CreditCardNumber;
+//! # struct Date;
+//! # struct Code;
+//! # struct Error;
+//! #
+//! # struct CreditCard {
+//! #     number: CreditCardNumber,
+//! #     expiration: Date,
+//! #     cvv: Code,
+//! # }
+//! #
+//! # impl CreditCard {
+//! #     fn new(number: CreditCardNumber, expiration: Date, cvv: Code) -> Self {
+//! #         CreditCard {
+//! #             number,
+//! #             expiration,
+//! #             cvv,
+//! #         }
+//! #     }
+//! # }
+//! #
+//! fn validate_number(number: CreditCardNumber) -> Result<CreditCardNumber, Error> {
+//!     unimplemented!("Validate credit card number")
+//! }
+//!
+//! fn validate_expiration(date: Date) -> Result<Date, Error> {
+//!     unimplemented!("Validate credit card expiration date")
+//! }
+//!
+//! fn validate_cvv(cvv: Code) -> Result<Code, Error> {
+//!     unimplemented!("Validate credit card cvv")
+//! }
+//!
+//! fn validate_credit_card(
+//!     number: CreditCardNumber,
+//!     expiration: Date,
+//!     cvv: Code,
+//! ) -> Result<CreditCard, Error> {
+//!     Result::pure(curry3!(CreditCard::new))
+//!         .ap(validate_number(number))
+//!         .ap(validate_expiration(expiration))
+//!         .ap(validate_cvv(cvv))
+//! }
+//!
+//! // Can be also written as:
+//! fn validate_credit_card_alt(
+//!     number: CreditCardNumber,
+//!     expiration: Date,
+//!     cvv: Code,
+//! ) -> Result<CreditCard, Error> {
+//!     validate_number(number)
+//!         .map(|number| |expiration, cvv| CreditCard::new(number, expiration, cvv))
+//!         .ap2(validate_expiration(expiration), validate_cvv(cvv))
+//! }
+//! ```
 
 use core::marker::PhantomData;
 
@@ -6,7 +69,7 @@ use crate::apply::Apply;
 use crate::higher::Higher;
 
 /// Applicative functor. This is a stronger version of Apply that has pure.
-/// Allows application of a function in an Applicative context to a value in an Applicative context.
+/// See [the module level documentation](self) for more.
 pub trait Applicative: Apply<<Self as Higher>::Param>
 where
     Self: Sized,

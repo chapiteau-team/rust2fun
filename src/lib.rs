@@ -3,6 +3,7 @@
 #![no_std]
 #![deny(missing_docs)]
 
+extern crate rust2fun_macros;
 #[cfg(feature = "std")]
 extern crate std;
 

@@ -8,11 +8,12 @@ use crate::constant1;
 use crate::functor::Functor;
 use crate::higher::Higher;
 
-/// Gives access to the `flat_map` method. The motivation for separating this out of [Monad] is that
-/// there are situations where `flat_map` can be implemented but not `pure`.
+/// Gives access to the `flat_map` method. The motivation for separating this out of
+/// [Monad](super::monad::Monad) is that there are situations where `flat_map` can be implemented
+/// but not `pure`.
 pub trait FlatMap<B>: Apply<B> {
     /// Maps a function over a value in the context and flattens the resulting nested context.
-    /// This is the same as `self.map(f).flatten()`.
+    /// This is the same  as `self.map(f).flatten()`.
     /// This is also known as `bind` or `>>=` in other languages.
     ///
     /// # Examples
@@ -53,8 +54,8 @@ pub trait FlatMap<B>: Apply<B> {
     /// use rust2fun::prelude::*;
     ///
     /// let x = Some(1);
-    /// let actual = x.flat_map(|x| Some(x.to_string()));
-    /// assert_eq!(Some("1".to_string()), actual);
+    /// let actual = x.m_product(|x| Some(x.to_string()));
+    /// assert_eq!(Some((1, "1".to_string())), actual);
     /// ```
     fn m_product<F>(self, mut f: F) -> Self::Target<(Self::Param, B)>
     where

@@ -21,7 +21,7 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// ```
     fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
     where
-        Self::Param: FnMut(A) -> B;
+        Self::Param: FnOnce(A) -> B;
 
     /// Is a binary version of [ap].
     ///
@@ -45,9 +45,9 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
         Self::Target<(<Self::Target<(Self::Param, B)> as Higher>::Param, A)>:
             Functor<Z, Target<Z> = Self::Target<Z>>,
         Self: Sized,
-        Self::Param: FnMut(A, B) -> Z,
+        Self::Param: FnOnce(A, B) -> Z,
     {
-        self.product(fb).product(fa).map(|((mut f, b), a)| f(a, b))
+        self.product(fb).product(fa).map(|((f, b), a)| f(a, b))
     }
 
     /// Combine two effectful values into a single effectful value using a binary function.
@@ -120,11 +120,11 @@ macro_rules! apply_iter {
             #[inline]
             fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
             where
-                Self::Param: FnMut(A) -> B,
+                Self::Param: FnOnce(A) -> B,
             {
                 self.into_iter()
                     .zip(fa)
-                    .map(|(mut f, a)| f(a))
+                    .map(|(f, a)| f(a))
                     .collect::<$name<B>>()
             }
         }
@@ -134,11 +134,11 @@ macro_rules! apply_iter {
             #[inline]
             fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
             where
-                Self::Param: FnMut(A) -> B,
+                Self::Param: FnOnce(A) -> B,
             {
                 self.into_iter()
                     .zip(fa)
-                    .map(|(mut f, a)| f(a))
+                    .map(|(f, a)| f(a))
                     .collect::<$name<B>>()
             }
         }
@@ -149,7 +149,7 @@ impl<F, B> Apply<B> for PhantomData<F> {
     #[inline]
     fn ap<A>(self, _fa: PhantomData<A>) -> PhantomData<B>
     where
-        Self::Param: FnMut(A) -> B,
+        Self::Param: FnOnce(A) -> B,
     {
         PhantomData
     }
@@ -159,9 +159,9 @@ impl<F, B> Apply<B> for Option<F> {
     #[inline]
     fn ap<A>(self, fa: Option<A>) -> Option<B>
     where
-        Self::Param: FnMut(A) -> B,
+        Self::Param: FnOnce(A) -> B,
     {
-        fa.and_then(|a| self.map(|mut f| f(a)))
+        fa.and_then(|a| self.map(|f| f(a)))
     }
 }
 
@@ -169,9 +169,9 @@ impl<F, B, E> Apply<B> for Result<F, E> {
     #[inline]
     fn ap<A>(self, fa: Result<A, E>) -> Result<B, E>
     where
-        Self::Param: FnMut(A) -> B,
+        Self::Param: FnOnce(A) -> B,
     {
-        fa.and_then(|a| self.map(|mut f| f(a)))
+        fa.and_then(|a| self.map(|f| f(a)))
     }
 }
 
@@ -183,9 +183,9 @@ if_std! {
 
     impl<F, B> Apply<B> for Box<F> {
         #[inline]
-        fn ap<A>(mut self, fa: Box<A>) -> Box<B>
+        fn ap<A>(self, fa: Box<A>) -> Box<B>
         where
-            Self::Param: FnMut(A) -> B,
+            Self::Param: FnOnce(A) -> B,
         {
             Box::new((*self)(*fa))
         }
@@ -202,10 +202,10 @@ if_std! {
         #[inline]
         fn ap<A>(mut self, fa: HashMap<K, A>) -> HashMap<K, B>
         where
-            Self::Param: FnMut(A) -> B,
+            Self::Param: FnOnce(A) -> B,
         {
             fa.into_iter()
-                .filter_map(|(k, a)| self.remove(&k).map(|mut f| (k, f(a))))
+                .filter_map(|(k, a)| self.remove(&k).map(|f| (k, f(a))))
                 .collect()
         }
     }

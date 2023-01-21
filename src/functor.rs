@@ -1,4 +1,43 @@
-//! Functors. The name is short for "covariant functor".
+//! Functor. The name is short for "covariant functor".
+//!
+//! A functor is a type constructor that supports mapping over its contents.
+//!
+//! # Example
+//!
+//! ```no_run
+//! use rust2fun::prelude::*;
+//! #
+//! # struct CreditCard;
+//! # struct User;
+//!
+//! fn get_user(id: u32) -> Option<User> {
+//!     unimplemented!("Get a user from a storage by id if it exists")
+//! }
+//!
+//! fn get_all_users() -> Vec<User> {
+//!     unimplemented!("Get all users from a storage")
+//! }
+//!
+//! fn get_credit_card(user: User) -> CreditCard {
+//!     unimplemented!("Get a credit card that corresponds to the user")
+//! }
+//!
+//! fn print_credit_card(card: CreditCard) {
+//!     unimplemented!("Print a credit card")
+//! }
+//!
+//! fn print_user_credit_card<F>(user: F)
+//! where
+//!     F: Functor<CreditCard, Param = User>,
+//!     F::Target<CreditCard>: Functor<(), Param = CreditCard>,
+//! {
+//!     user.map(get_credit_card).map(print_credit_card);
+//! }
+//!
+//! print_user_credit_card(get_user(1));
+//! # #[cfg(feature = "std")]
+//! print_user_credit_card(get_all_users());
+//! ```
 
 use core::marker::PhantomData;
 
@@ -16,14 +55,15 @@ use crate::invariant::Invariant;
 /// let mut f = lift(|x: i32| x + 1);
 /// assert_eq!(Some(2), f(Some(1)));
 /// ```
-pub fn lift<FA, B>(mut f: impl FnMut(FA::Param) -> B) -> impl FnMut(FA) -> FA::Target<B>
+pub fn lift<FA, B, F>(mut f: F) -> impl FnMut(FA) -> FA::Target<B>
 where
     FA: Functor<B>,
+    F: FnMut(FA::Param) -> B,
 {
-    move |fa: FA| fa.map(&mut f)
+    move |fa| fa.map(&mut f)
 }
 
-/// Covariant functor.
+/// Covariant functor. See [the module level documentation](self) for more.
 pub trait Functor<B>: Invariant<B> {
     /// Transform a `Self<A>` into a `Self<B>` by providing a transformation from `A` to `B`.
     ///
