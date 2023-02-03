@@ -72,7 +72,6 @@ pub trait FlatMap<B>: Apply<B> {
     ///
     /// # Examples
     /// ```
-    /// use rust2fun::constant;
     /// use rust2fun::prelude::*;
     ///
     /// let x = Some(true);

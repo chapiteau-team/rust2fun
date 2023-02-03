@@ -1,4 +1,3 @@
-use rust2fun::compose;
 use rust2fun::prelude::*;
 
 use crate::is_eq::IsEq;

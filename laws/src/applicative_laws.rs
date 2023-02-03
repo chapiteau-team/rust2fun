@@ -40,14 +40,18 @@ where
 
 pub fn ap_product_consistent<FA, B, F>(fa: FA, ff: FA::Target<F>) -> IsEq<FA::Target<B>>
 where
-    FA: Semigroupal<F> + Clone,
+    FA: Higher + Clone,
     F: Fn(FA::Param) -> B,
-    FA::Target<F>: Apply<B, Target<B> = FA::Target<B>> + Higher<Target<FA::Param> = FA> + Clone,
-    FA::Target<(FA::Param, F)>: Functor<B>,
+    FA::Target<F>: Apply<B, Target<B> = FA::Target<B>>
+        + Higher<Target<FA::Param> = FA>
+        + Semigroupal<FA::Param, Target<(F, FA::Param)> = FA::Target<(F, FA::Param)>>
+        + Clone,
+    FA::Target<(F, FA::Param)>: Functor<B>,
     FA::Target<B>: Eq,
 {
     let lhs = ff.clone().ap(fa.clone());
-    let rhs = fa.product(ff).map(|(a, f)| f(a)).unsafe_cast();
+    let rhs = ff.product(fa).map(|(f, a)| f(a)).unsafe_cast();
+
     IsEq::equal_under_law(lhs, rhs)
 }
 

@@ -18,36 +18,23 @@ mod common;
 #[test]
 fn test_invariant() {
     assert!(invariant_identity(PhantomData::<bool>).holds());
-
-    let invariant_composition_for = |x| invariant_composition(x, print, parse, parse::<i32>, print);
-    assert!(invariant_composition_for(PhantomData::<i32>).holds());
+    assert!(invariant_composition(PhantomData::<u32>, print, parse, parse::<i32>, print).holds());
 }
 
 #[test]
 fn test_functor() {
     assert!(covariant_identity(PhantomData::<u32>).holds());
-
-    let covariant_composition_for = |x| covariant_composition(x, print, parse::<u32>);
-    assert!(covariant_composition_for(PhantomData::<i32>).holds());
-
+    assert!(covariant_composition(PhantomData::<i32>, print, parse::<u32>).holds());
     assert!(lift_identity(PhantomData::<u32>).holds());
-
-    let lift_composition_for = |x| lift_composition(x, print, parse::<i64>);
-    assert!(lift_composition_for(PhantomData::<i32>).holds());
+    assert!(lift_composition(PhantomData::<i32>, print, parse::<i64>).holds());
 }
 
 #[test]
 fn test_contravariant() {
     assert!(contravariant_identity(PhantomData::<u32>).holds());
-
-    let covariant_composition_for = |x| contravariant_composition(x, parse::<i32>, print::<u32>);
-    assert!(covariant_composition_for(PhantomData::<i32>).holds());
-
+    assert!(contravariant_composition(PhantomData::<i32>, parse::<i32>, print::<u32>).holds());
     assert!(lift_contravariant_identity(PhantomData::<u32>).holds());
-
-    let lift_contravariant_composition_for =
-        |x| lift_contravariant_composition(x, parse::<i32>, print::<u32>);
-    assert!(lift_contravariant_composition_for(PhantomData::<i32>).holds());
+    assert!(lift_contravariant_composition(PhantomData::<i32>, parse::<i32>, print::<u32>).holds());
 }
 
 #[test]
@@ -60,9 +47,7 @@ fn test_semigroupal() {
 
 #[test]
 fn test_apply() {
-    let check_length = |x: &str, l: usize| x.len() == l;
-
-    assert!(map2_product_consistency(PhantomData, PhantomData, check_length).holds());
+    assert!(map2_product_consistency(PhantomData, PhantomData, |x: &str, l| x.len() == l).holds());
     assert!(product_r_consistency(PhantomData::<u32>, PhantomData::<u32>).holds());
     assert!(product_l_consistency(PhantomData::<u32>, PhantomData::<u32>).holds());
 }

@@ -16,7 +16,7 @@ where
     IsEq::equal_under_law(lhs, rhs)
 }
 
-pub fn flat_map_consistent_apply<FA, B, F>(fa: FA, fab: FA::Target<F>) -> IsEq<FA::Target<B>>
+pub fn flat_map_consistent_apply<FA, B, F>(fa: FA, ff: FA::Target<F>) -> IsEq<FA::Target<B>>
 where
     FA: Functor<B> + Clone,
     F: Fn(FA::Param) -> B,
@@ -26,8 +26,8 @@ where
         + Clone,
     FA::Target<B>: Eq,
 {
-    let lhs = fab.clone().flat_map(|f| fa.clone().map(f));
-    let rhs = fab.ap(fa);
+    let lhs = ff.clone().flat_map(|f| fa.clone().map(f));
+    let rhs = ff.ap(fa);
 
     IsEq::equal_under_law(lhs, rhs)
 }

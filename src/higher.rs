@@ -46,7 +46,6 @@ pub trait Higher {
 /// # Example
 ///
 /// ```
-/// use rust2fun::higher;
 /// use rust2fun::prelude::*;
 ///
 /// struct Unary<T>(T);

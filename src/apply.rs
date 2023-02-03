@@ -161,7 +161,7 @@ impl<F, B> Apply<B> for Option<F> {
     where
         Self::Param: FnOnce(A) -> B,
     {
-        fa.and_then(|a| self.map(|f| f(a)))
+        self.and_then(|f| fa.map(|a| f(a)))
     }
 }
 
@@ -171,7 +171,7 @@ impl<F, B, E> Apply<B> for Result<F, E> {
     where
         Self::Param: FnOnce(A) -> B,
     {
-        fa.and_then(|a| self.map(|f| f(a)))
+        self.and_then(|f| fa.map(|a| f(a)))
     }
 }
 

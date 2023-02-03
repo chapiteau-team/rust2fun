@@ -12,7 +12,7 @@ use rust2fun_macros::{constant_arity, curry_arity};
 /// # Example
 ///
 /// ```
-/// use rust2fun::compose;
+/// use rust2fun::prelude::*;
 ///
 /// let f = |x| x + 1;
 /// let g = |x| x / 2;
@@ -41,7 +41,7 @@ macro_rules! compose {
 /// # Example
 ///
 /// ```
-/// use rust2fun::pipe;
+/// use rust2fun::prelude::*;
 ///
 /// let f = |x| x + 1;
 /// let g = |x| x / 2;
@@ -70,7 +70,7 @@ macro_rules! pipe {
 /// # Example
 ///
 /// ```
-/// use rust2fun::curry2;
+/// use rust2fun::prelude::*;
 ///
 /// let g = curry2!(Option::map);
 ///
@@ -97,7 +97,7 @@ curry_arity!(9);
 /// # Example
 ///
 /// ```
-/// use rust2fun::flip;
+/// use rust2fun::prelude::*;
 ///
 /// let f = |x: i32, y: i32| 2 * x + y;
 /// let flipped = flip!(f);
@@ -115,7 +115,7 @@ macro_rules! flip {
 /// # Example
 ///
 /// ```
-/// use rust2fun::constant;
+/// use rust2fun::prelude::*;
 ///
 /// let f = constant!(42);
 /// assert_eq!(42, f());
@@ -132,7 +132,7 @@ macro_rules! constant {
 /// # Example
 ///
 /// ```
-/// use rust2fun::constant1;
+/// use rust2fun::prelude::*;
 ///
 /// let actual = Some(1).map(constant1!(2));
 /// assert_eq!(Some(2), actual);
@@ -149,7 +149,7 @@ macro_rules! constant1 {
 /// # Example
 ///
 /// ```
-/// use rust2fun::constant2;
+/// use rust2fun::prelude::*;
 ///
 /// let actual = (1..4).reduce(constant2!(2));
 /// assert_eq!(Some(2), actual);

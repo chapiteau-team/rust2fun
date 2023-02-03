@@ -226,7 +226,6 @@ pub trait Functor<B>: Invariant<B> {
     /// # Examples
     ///
     /// ```
-    /// use rust2fun::constant;
     /// use rust2fun::prelude::*;
     ///
     /// let x = Some(true);

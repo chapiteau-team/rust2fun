@@ -3,7 +3,8 @@ mod common;
 if_std! {
     extern crate rust2fun_laws;
 
-    use rust2fun::prelude::*;
+    use proptest::collection::vec;
+    use proptest::prelude::*;
 
     use rust2fun_laws::applicative_laws::*;
     use rust2fun_laws::apply_laws::*;
@@ -15,107 +16,72 @@ if_std! {
 
     use crate::common::{parse, print};
 
-    #[test]
-    fn test_invariant() {
-        assert!(invariant_identity(Vec::<bool>::default()).holds());
-        assert!(invariant_identity(vec![true]).holds());
-        assert!(invariant_identity(vec![1, 2, 3]).holds());
-
-        let invariant_composition_for = |x| invariant_composition(x, print, parse, parse::<i32>, print);
-        assert!(invariant_composition_for(Vec::default()).holds());
-        assert!(invariant_composition_for(vec![1]).holds());
-        assert!(invariant_composition_for(vec![1, 2, 3]).holds());
+    proptest! {
+        #[test]
+        fn test_invariant(fa: Vec<bool>) {
+            assert!(invariant_identity(fa.clone()).holds());
+            assert!(invariant_composition(fa, print, parse, parse::<bool>, print).holds());
+        }
     }
 
-    #[test]
-    fn test_functor() {
-        assert!(covariant_identity(Vec::<u32>::default()).holds());
-        assert!(covariant_identity(vec![1]).holds());
-        assert!(covariant_identity(vec![1, 2, 3]).holds());
-
-        let covariant_composition_for = |x| covariant_composition(x, print, parse::<i8>);
-        assert!(covariant_composition_for(Vec::default()).holds());
-        assert!(covariant_composition_for(vec![1]).holds());
-        assert!(covariant_composition_for(vec![1, 2, 3]).holds());
-
-        assert!(lift_identity(Vec::<u32>::default()).holds());
-        assert!(lift_identity(vec![1]).holds());
-        assert!(lift_identity(vec![1, 2, 3]).holds());
-
-        let lift_composition_for = |x| lift_composition(x, print, parse::<u8>);
-        assert!(lift_composition_for(Vec::default()).holds());
-        assert!(lift_composition_for(vec![1]).holds());
-        assert!(lift_composition_for(vec![1, 2, 3]).holds());
+    proptest! {
+        #[test]
+        fn test_functor(fa: Vec<bool>) {
+            assert!(covariant_identity(fa.clone()).holds());
+            assert!(covariant_composition(fa.clone(), print, parse::<bool>).holds());
+            assert!(lift_identity(fa.clone()).holds());
+            assert!(lift_composition(fa, print, parse::<bool>).holds());
+        }
     }
 
-    #[test]
-    fn test_semigroupal() {
-        assert!(semigroupal_associativity(
-            Vec::<u32>::default(),
-            Vec::<String>::default(),
-            Vec::<Result<&str, bool>>::default()
-        )
-        .holds());
-
-        assert!(semigroupal_associativity(
-            Vec::from([1]),
-            Vec::from(["some".to_string()]),
-            Vec::from([Ok::<_, bool>("ok")])
-        )
-        .holds());
-
-        assert!(semigroupal_associativity(
-            Vec::from([1, 2, 3]),
-            Vec::from(["some".to_string(), "other".to_string()]),
-            Vec::from([Ok::<_, bool>("ok"), Err::<_, bool>(false)])
-        )
-        .holds());
+    proptest! {
+        #[test]
+        fn test_semigroupal(fa: Vec<bool>, fb: Vec<i32>, fc: Vec<Result<String, u8>>) {
+            assert!(semigroupal_associativity(fa, fb, fc).holds());
+        }
     }
 
-    #[test]
-    fn test_apply() {
-        let check_length = |x: &str, l: usize| x.len() == l;
-
-        assert!(map2_product_consistency(Vec::<&str>::default(), Vec::<usize>::default(), check_length).holds());
-        assert!(map2_product_consistency(Vec::from(["some"]), Vec::from([4]), check_length).holds());
-        assert!(map2_product_consistency(Vec::from(["some", "other"]), Vec::from([4, 5]), check_length).holds());
-
-        assert!(product_r_consistency(Vec::<&str>::default(), Vec::<usize>::default()).holds());
-        assert!(product_r_consistency(Vec::from(["some"]), Vec::from([4])).holds());
-        assert!(product_r_consistency(Vec::from(["some", "other"]), Vec::from([4, 5])).holds());
-
-        assert!(product_l_consistency(Vec::<&str>::default(), Vec::<usize>::default()).holds());
-        assert!(product_l_consistency(Vec::from(["some"]), Vec::from([4])).holds());
-        assert!(product_l_consistency(Vec::from(["some", "other"]), Vec::from([4, 5])).holds());
+    proptest! {
+        #[test]
+        fn test_apply(fa: Vec<String>, fb: Vec<usize>) {
+            assert!(map2_product_consistency(fa.clone(), fb.clone(), |a, b| a.len() == b).holds());
+            assert!(product_r_consistency(fa.clone(), fb.clone()).holds());
+            assert!(product_l_consistency(fa, fb).holds());
+        }
     }
 
-    #[test]
-    fn test_applicative() {
-        assert!(applicative_identity(Vec::pure(1)).holds());
-        assert!(applicative_homomorphism::<Vec<_>, _, _>(1, print).holds());
-        assert!(applicative_map(Vec::pure(1), print).holds());
-        assert!(ap_product_consistent(Vec::pure(1), Vec::pure(print)).holds());
-        assert!(applicative_unit::<Vec<_>>(1).holds());
+    proptest! {
+        #[test]
+        fn test_applicative(a: bool, fa in vec(any::<bool>(), 0..=1)) {
+            assert!(applicative_identity(fa.clone()).holds());
+            assert!(applicative_homomorphism::<Vec<_>, _, _>(a, print).holds());
+            assert!(applicative_map(fa.clone(), print).holds());
+            let ff= vec![print; fa.len()];
+            assert!(ap_product_consistent(fa, ff).holds());
+            assert!(applicative_unit::<Vec<_>>(a).holds());
+        }
     }
 
-    #[test]
-    fn test_flatmap() {
-        assert!(flat_map_associativity(
-            Vec::pure(1),
-            |x| Vec::pure(print(x)),
-            |x| Vec::pure(parse::<i32>(x))
-        )
-        .holds());
-
-        assert!(flat_map_consistent_apply(Vec::pure(1), Vec::pure(print)).holds());
-
-        assert!(m_product_consistency(Vec::pure(1), |x| Vec::pure(print(x))).holds());
+    proptest! {
+        #[test]
+        fn test_flatmap(fa in vec(any::<bool>(), 0..=1)) {
+            assert!(flat_map_associativity(fa.clone(), |x| vec![print(x)], |s| vec![parse::<bool>(s)]).holds());
+            assert!(flat_map_associativity(fa.clone(), |_| Vec::new(), |s| vec![parse::<bool>(s)]).holds());
+            assert!(flat_map_associativity(fa.clone(), |x| vec![print(x)], |_| Vec::<bool>::new()).holds());
+            assert!(flat_map_associativity(fa.clone(), |_| Vec::new(), |_: String| Vec::<bool>::new()).holds());
+            assert!(flat_map_consistent_apply(fa.clone(), vec![print; fa.len()]).holds());
+            assert!(m_product_consistency(fa.clone(), |x| vec![print(x)]).holds());
+            assert!(m_product_consistency(fa, |_| Vec::<String>::new()).holds());
+        }
     }
 
-    #[test]
-    fn test_monad() {
-        assert!(monad_left_identity::<Vec<_>, _, _>(1, |x| Vec::pure(print(x))).holds());
-        assert!(monad_right_identity(Vec::pure(1)).holds());
-        assert!(map_flat_map_coherence(Vec::pure(1), print).holds());
+    proptest! {
+        #[test]
+        fn test_monad(a: bool, fa: Vec<bool>) {
+            assert!(monad_left_identity::<Vec<_>, _, _>(a, |x| vec![print(x)]).holds());
+            assert!(monad_left_identity::<Vec<_>, _, _>(a, |_| Vec::<String>::new()).holds());
+            assert!(monad_right_identity(fa.clone()).holds());
+            assert!(map_flat_map_coherence(fa, print).holds());
+        }
     }
 }

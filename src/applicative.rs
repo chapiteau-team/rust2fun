@@ -4,7 +4,6 @@
 //! # Examples
 //!
 //! ```
-//! use rust2fun::curry3;
 //! use rust2fun::prelude::*;
 //!
 //! # struct CreditCardNumber;

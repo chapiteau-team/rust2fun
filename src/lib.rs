@@ -32,6 +32,7 @@ pub mod semigroupal;
 
 /// Convenience re-export of common members of the library.
 pub mod prelude {
+    pub use crate::*;
     pub use crate::applicative::*;
     pub use crate::apply::*;
     pub use crate::combinator::*;

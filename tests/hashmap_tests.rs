@@ -5,6 +5,8 @@ if_std! {
 
     use std::collections::HashMap;
 
+    use proptest::prelude::*;
+
     use rust2fun_laws::apply_laws::*;
     use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
@@ -13,45 +15,38 @@ if_std! {
 
     use crate::common::{parse, print};
 
-
-    #[test]
-    fn test_invariant() {
-        assert!(invariant_identity(HashMap::from([(1, "id")])).holds());
-        assert!(
-            invariant_composition(HashMap::from([(1, 1)]), print, parse, parse::<i32>, print).holds()
-        );
+    proptest! {
+        #[test]
+        fn test_invariant(fa: HashMap::<i32, bool>) {
+            assert!(invariant_identity(fa.clone()).holds());
+            assert!(invariant_composition(fa, print, parse, parse::<bool>, print).holds());
+        }
     }
 
-    #[test]
-    fn test_functor() {
-        assert!(covariant_identity(HashMap::from([(1, 1)])).holds());
-        assert!(covariant_composition(HashMap::from([(1, 1)]), print, parse::<u32>).holds());
-        assert!(lift_identity(HashMap::from([(1, 1)])).holds());
-        assert!(lift_composition(HashMap::from([(1, 1)]), print, parse::<i64>).holds());
+    proptest! {
+        #[test]
+        fn test_functor(fa: HashMap::<i32, bool>) {
+            assert!(covariant_identity(fa.clone()).holds());
+            assert!(covariant_composition(fa.clone(), print, parse::<bool>).holds());
+            assert!(lift_identity(fa.clone()).holds());
+            assert!(lift_composition(fa, print, parse::<bool>).holds());
+        }
     }
 
-    #[test]
-    fn test_semigroupal() {
-        assert!(semigroupal_associativity(
-            HashMap::from([(1, 1)]),
-            HashMap::from([(1, "map".to_string())]),
-            HashMap::from([(1, Ok::<_, bool>("ok"))])
-        )
-        .holds());
+    proptest! {
+        #[test]
+        fn test_semigroupal(fa: HashMap::<i32, bool>, fb:HashMap::<i32, usize>, fc: HashMap<i32, Result<String, u8>>) {
+            assert!(semigroupal_associativity(fa, fb, fc).holds());
+        }
     }
 
-    #[test]
-    fn test_apply() {
-        let check_length = |x: &str, l: usize| x.len() == l;
-
-        assert!(map2_product_consistency(
-            HashMap::from([(1, "str")]),
-            HashMap::from([(1, 1)]),
-            check_length
-        )
-        .holds());
-        assert!(product_r_consistency(HashMap::from([(1, "str")]), HashMap::from([(1, 1)])).holds());
-        assert!(product_l_consistency(HashMap::from([(1, "str")]), HashMap::from([(1, 1)])).holds());
+    proptest! {
+        #[test]
+        fn test_apply(fa: HashMap<i32, String>, fb: HashMap<i32, usize>) {
+            assert!(map2_product_consistency(fa.clone(), fb.clone(), |a, b| a.len() == b).holds());
+            assert!(product_r_consistency(fa.clone(), fb.clone()).holds());
+            assert!(product_l_consistency(fa, fb).holds());
+        }
     }
 
     #[test]

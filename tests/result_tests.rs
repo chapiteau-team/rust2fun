@@ -1,5 +1,7 @@
 extern crate rust2fun_laws;
 
+use proptest::proptest;
+
 use rust2fun_laws::applicative_laws::*;
 use rust2fun_laws::apply_laws::*;
 use rust2fun_laws::flatmap_laws::*;
@@ -12,107 +14,72 @@ use crate::common::{parse, print};
 
 mod common;
 
-#[test]
-fn test_invariant() {
-    assert!(invariant_identity(Err::<(), _>(true)).holds());
-    assert!(invariant_identity(Ok::<_, bool>(1)).holds());
-
-    let invariant_composition_for = |x| invariant_composition(x, print, parse, parse::<i32>, print);
-    assert!(invariant_composition_for(Err(true)).holds());
-    assert!(invariant_composition_for(Ok(1)).holds());
+proptest! {
+    #[test]
+    fn test_invariant(fa: Result<bool, i32>) {
+        assert!(invariant_identity(fa).holds());
+        assert!(invariant_composition(fa, print, parse, parse::<bool>, print).holds());
+    }
 }
 
-#[test]
-fn test_functor() {
-    assert!(covariant_identity(Err::<(), _>(true)).holds());
-    assert!(covariant_identity(Ok::<_, bool>(1)).holds());
-
-    let covariant_composition_for = |x| covariant_composition(x, print, parse::<i64>);
-    assert!(covariant_composition_for(Err(true)).holds());
-    assert!(covariant_composition_for(Ok(1)).holds());
-
-    assert!(lift_identity(Err::<(), _>(true)).holds());
-    assert!(lift_identity(Ok::<_, bool>(1)).holds());
-
-    let lift_composition_for = |x| lift_composition(x, print, parse::<u8>);
-    assert!(lift_composition_for(Err(true)).holds());
-    assert!(lift_composition_for(Ok(1)).holds());
+proptest! {
+    #[test]
+    fn test_functor(fa: Result<bool, i32>) {
+        assert!(covariant_identity(fa).holds());
+        assert!(covariant_composition(fa, print, parse::<bool>).holds());
+        assert!(lift_identity(fa).holds());
+        assert!(lift_composition(fa, print, parse::<bool>).holds());
+    }
 }
 
-#[test]
-fn test_semigroupal() {
-    assert!(semigroupal_associativity(Ok::<_, ()>(1), Ok("ok".to_string()), Ok(true)).holds());
-    assert!(semigroupal_associativity(
-        Ok::<_, bool>(1),
-        Ok("ok".to_string()),
-        Err::<Option<()>, _>(false)
-    )
-    .holds());
+proptest! {
+    #[test]
+    fn test_semigroupal(fa: Result<bool, i32>, fb: Result<String, i32>, fc: Result<Option<String>, i32>) {
+        assert!(semigroupal_associativity(fa, fb, fc).holds());
+    }
 }
 
-#[test]
-fn test_apply() {
-    let check_length = |x: &str, l: usize| x.len() == l;
-
-    assert!(map2_product_consistency(Ok::<_, ()>("str"), Ok(1), check_length).holds());
-    assert!(map2_product_consistency(Ok("str"), Err(()), check_length).holds());
-    assert!(map2_product_consistency(Err(()), Ok(1), check_length).holds());
-    assert!(map2_product_consistency(Err(()), Err(()), check_length).holds());
-
-    assert!(product_r_consistency(Ok::<_, ()>("str"), Ok(1)).holds());
-    assert!(product_r_consistency(Ok("str"), Err::<i32, _>(())).holds());
-    assert!(product_r_consistency(Err::<i32, _>(()), Ok(1)).holds());
-    assert!(product_r_consistency(Err::<i32, _>(()), Err::<i32, _>(())).holds());
-
-    assert!(product_l_consistency(Ok::<_, ()>("str"), Ok(1)).holds());
-    assert!(product_l_consistency(Ok("str"), Err::<i32, _>(())).holds());
-    assert!(product_l_consistency(Err::<i32, _>(()), Ok(1)).holds());
-    assert!(product_l_consistency(Err::<i32, _>(()), Err::<i32, _>(())).holds());
+proptest! {
+    #[test]
+    fn test_apply(fa: Result<String, i32>, fb: Result<usize, i32>) {
+        assert!(map2_product_consistency(fa.clone(), fb, |a, b| a.len() == b).holds());
+        assert!(product_r_consistency(fa.clone(), fb).holds());
+        assert!(product_l_consistency(fa, fb).holds());
+    }
 }
 
-#[test]
-fn test_applicative() {
-    assert!(applicative_identity(Ok::<_, ()>(1)).holds());
-    assert!(applicative_identity(Err::<i32, _>(false)).holds());
-
-    assert!(applicative_homomorphism::<Result<_, ()>, _, _>(1, print).holds());
-
-    assert!(applicative_map(Ok::<_, ()>(1), print).holds());
-    assert!(applicative_map(Err(()), print::<i32>).holds());
-
-    assert!(ap_product_consistent(Err(false), Ok(print::<i32>)).holds());
-    assert!(ap_product_consistent(Ok::<_, bool>(1), Ok(print)).holds());
-
-    assert!(applicative_unit::<Result<_, ()>>(1).holds());
+proptest! {
+    #[test]
+    fn test_applicative(fa: Result<bool, i32>, a: bool) {
+        assert!(applicative_identity(fa).holds());
+        assert!(applicative_homomorphism::<Option<_>, _, _>(a, print).holds());
+        assert!(applicative_map(fa, print).holds());
+        assert!(ap_product_consistent(fa, Ok(print)).holds());
+        assert!(ap_product_consistent(fa, Err::<fn(bool) -> String, _>(-1)).holds());
+        assert!(applicative_unit::<Option<_>>(a).holds());
+    }
 }
 
-#[test]
-fn test_flatmap() {
-    assert!(
-        flat_map_associativity(Ok::<_, ()>(1), |x| Ok(print(x)), |s| Ok(parse::<i32>(s))).holds()
-    );
-    assert!(flat_map_associativity(
-        Err::<u32, _>(false),
-        |x| Ok(print(x)),
-        |s| Ok(parse::<i32>(s))
-    )
-    .holds());
-
-    assert!(flat_map_consistent_apply(Ok::<_, ()>(1), Ok(print)).holds());
-    assert!(flat_map_consistent_apply(Err::<u32, _>(false), Ok(print)).holds());
-
-    assert!(m_product_consistency(Ok::<_, ()>(1), |x| Ok(print(x))).holds());
-    assert!(m_product_consistency(Err::<u32, _>(false), |x| Ok(print(x))).holds());
+proptest! {
+    #[test]
+    fn test_flatmap(fa: Result<bool, i32>) {
+        assert!(flat_map_associativity(fa, |x| Ok(print(x)), |s| Ok(parse::<bool>(s))).holds());
+        assert!(flat_map_associativity(fa, |_| Err(-1), |s| Ok(parse::<bool>(s))).holds());
+        assert!(flat_map_associativity(fa, |x| Ok(print(x)), |_| Err::<bool, _>(-1)).holds());
+        assert!(flat_map_associativity(fa, |_| Err::<String, _>(-1), |_| Err::<bool, _>(-1)).holds());
+        assert!(flat_map_consistent_apply(fa, Ok(print)).holds());
+        assert!(flat_map_consistent_apply(fa, Err::<fn(bool)-> String, _>(-1)).holds());
+        assert!(m_product_consistency(fa, |x| Ok(print(x))).holds());
+        assert!(m_product_consistency(fa, |_| Err::<String, _>(-1)).holds());
+    }
 }
 
-#[test]
-fn test_monad() {
-    assert!(monad_left_identity::<Result<_, bool>, _, _>(1, |x| Ok(print(x))).holds());
-    assert!(monad_left_identity::<Result<_, _>, String, _>(1, |_x| Err(false)).holds());
-
-    assert!(monad_right_identity(Ok::<_, ()>(1)).holds());
-    assert!(monad_right_identity(Err::<i32, _>(false)).holds());
-
-    assert!(map_flat_map_coherence(Ok::<_, ()>(1), print).holds());
-    assert!(map_flat_map_coherence(Err::<i32, _>(false), print).holds());
+proptest! {
+    #[test]
+    fn test_monad(a: bool, fa: Result<bool, i32>) {
+        assert!(monad_left_identity::<Result<_, _>, _, _>(a, |x| Ok::<_, i32>(print(x))).holds());
+        assert!(monad_left_identity::<Result<_, _>, _, _>(a, |_| Err::<String, _>(-1)).holds());
+        assert!(monad_right_identity(fa).holds());
+        assert!(map_flat_map_coherence(fa, print).holds());
+    }
 }

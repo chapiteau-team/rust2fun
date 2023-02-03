@@ -38,7 +38,7 @@ use rust2fun::prelude::*;
 - argument flipping (with [flip](https://docs.rs/rust2fun/0.1.0/rust2fun/macro.flip.html) macro)
 - constant functions
     - [constant](https://docs.rs/rust2fun/0.1.0/rust2fun/macro.constant.html) macro
-    - [constant1](https://docs.rs/rust2fun/0.1.0/rust2fun/macro.constant1.html) macro (K combinator
+    - [constant1](https://docs.rs/rust2fun/0.1.0/rust2fun/macro.constant1.html) macro (K combinator)
     - [constant2](https://docs.rs/rust2fun/0.1.0/rust2fun/macro.constant2.html) macro
     - etc
 - [id](https://docs.rs/rust2fun/0.1.0/rust2fun/combinator/fn.id.html) (I combinator)
@@ -63,4 +63,4 @@ use rust2fun::prelude::*;
 ## Release notes
 
 0.1.0 (2023-01-22)
-:  Initial release: combinators, Semigroupal, Invariant, Functor, Apply, Applicative, FlatMap, Monad
+- Initial release: combinators, Semigroupal, Invariant, Functor, Apply, Applicative, FlatMap, Monad

@@ -1,123 +1,92 @@
+extern crate rust2fun_laws;
+
+use std::collections::LinkedList;
+use std::iter::repeat;
+
+use proptest::collection::linked_list;
+use proptest::prelude::*;
+
+use rust2fun::prelude::*;
+use rust2fun_laws::applicative_laws::*;
+use rust2fun_laws::apply_laws::*;
+use rust2fun_laws::flatmap_laws::*;
+use rust2fun_laws::functor_laws::*;
+use rust2fun_laws::invariant_laws::*;
+use rust2fun_laws::monad_laws::*;
+use rust2fun_laws::semigroupal_laws::*;
+
+use crate::common::{parse, print};
+
 mod common;
 
-if_std! {
-    extern crate rust2fun_laws;
-
-    use std::collections::LinkedList;
-
-    use rust2fun::prelude::*;
-
-    use rust2fun_laws::applicative_laws::*;
-    use rust2fun_laws::apply_laws::*;
-    use rust2fun_laws::flatmap_laws::*;
-    use rust2fun_laws::functor_laws::*;
-    use rust2fun_laws::invariant_laws::*;
-    use rust2fun_laws::monad_laws::*;
-    use rust2fun_laws::semigroupal_laws::*;
-
-    use crate::common::{parse, print};
-
+proptest! {
     #[test]
-    fn test_invariant() {
-        assert!(invariant_identity(LinkedList::<()>::default()).holds());
-        assert!(invariant_identity(LinkedList::from([true])).holds());
-        assert!(invariant_identity(LinkedList::from([1, 2, 3])).holds());
-
-        let invariant_composition_for = |x| invariant_composition(x, print, parse, parse::<i32>, print);
-        assert!(invariant_composition_for(LinkedList::default()).holds());
-        assert!(invariant_composition_for(LinkedList::from([1])).holds());
-        assert!(invariant_composition_for(LinkedList::from([1, 2, 3])).holds());
+    fn test_invariant(fa: LinkedList<bool>) {
+        assert!(invariant_identity(fa.clone()).holds());
+        assert!(invariant_composition(fa, print, parse, parse::<bool>, print).holds());
     }
+}
 
+proptest! {
     #[test]
-    fn test_functor() {
-        assert!(covariant_identity(LinkedList::<u32>::default()).holds());
-        assert!(covariant_identity(LinkedList::from([1])).holds());
-        assert!(covariant_identity(LinkedList::from([1, 2, 3])).holds());
-
-        let covariant_composition_for = |x| covariant_composition(x, print, parse::<i8>);
-        assert!(covariant_composition_for(LinkedList::default()).holds());
-        assert!(covariant_composition_for(LinkedList::from([1])).holds());
-        assert!(covariant_composition_for(LinkedList::from([1, 2, 3])).holds());
-
-        assert!(lift_identity(LinkedList::<u32>::default()).holds());
-        assert!(lift_identity(LinkedList::from([1])).holds());
-        assert!(lift_identity(LinkedList::from([1, 2, 3])).holds());
-
-        let lift_composition_for = |x| lift_composition(x, print, parse::<u8>);
-        assert!(lift_composition_for(LinkedList::default()).holds());
-        assert!(lift_composition_for(LinkedList::from([1])).holds());
-        assert!(lift_composition_for(LinkedList::from([1, 2, 3])).holds());
+    fn test_functor(fa: LinkedList<bool>) {
+        assert!(covariant_identity(fa.clone()).holds());
+        assert!(covariant_composition(fa.clone(), print, parse::<bool>).holds());
+        assert!(lift_identity(fa.clone()).holds());
+        assert!(lift_composition(fa, print, parse::<bool>).holds());
     }
+}
 
+proptest! {
     #[test]
-    fn test_semigroupal() {
-        assert!(semigroupal_associativity(
-            LinkedList::<u32>::default(),
-            LinkedList::<String>::default(),
-            LinkedList::<Result<&str, bool>>::default()
-        )
-        .holds());
-
-        assert!(semigroupal_associativity(
-            LinkedList::from([1]),
-            LinkedList::from(["some".to_string()]),
-            LinkedList::from([Ok::<_, bool>("ok")])
-        )
-        .holds());
-
-        assert!(semigroupal_associativity(
-            LinkedList::from([1, 2, 3]),
-            LinkedList::from(["some".to_string(), "other".to_string()]),
-            LinkedList::from([Ok::<_, bool>("ok"), Err::<_, bool>(false)])
-        )
-        .holds());
+    fn test_semigroupal(fa: LinkedList<bool>, fb: LinkedList<i32>, fc: LinkedList<Result<String, u8>>) {
+        assert!(semigroupal_associativity(fa, fb, fc).holds());
     }
+}
 
+proptest! {
     #[test]
-    fn test_apply() {
-        let check_length = |x: &str, l: usize| x.len() == l;
-
-        assert!(map2_product_consistency(LinkedList::<&str>::default(), LinkedList::<usize>::default(), check_length).holds());
-        assert!(map2_product_consistency(LinkedList::from(["str"]), LinkedList::from([1]), check_length).holds());
-        assert!(map2_product_consistency(LinkedList::from(["str", "other"]), LinkedList::from([3, 2]), check_length).holds());
-
-        assert!(product_r_consistency(LinkedList::<&str>::default(), LinkedList::<usize>::default()).holds());
-        assert!(product_r_consistency(LinkedList::from(["str"]), LinkedList::from([1])).holds());
-        assert!(product_r_consistency(LinkedList::from(["str", "other"]), LinkedList::from([3, 2])).holds());
-
-        assert!(product_l_consistency(LinkedList::<&str>::default(), LinkedList::<usize>::default()).holds());
-        assert!(product_l_consistency(LinkedList::from(["str"]), LinkedList::from([1])).holds());
-        assert!(product_l_consistency(LinkedList::from(["str", "other"]), LinkedList::from([3, 2])).holds());
+    fn test_apply(fa: LinkedList<String>, fb: LinkedList<usize>) {
+        assert!(map2_product_consistency(fa.clone(), fb.clone(), |a, b| a.len() == b).holds());
+        assert!(product_r_consistency(fa.clone(), fb.clone()).holds());
+        assert!(product_l_consistency(fa, fb).holds());
     }
+}
 
+proptest! {
     #[test]
-    fn test_applicative() {
-        assert!(applicative_identity(LinkedList::pure(1)).holds());
-        assert!(applicative_homomorphism::<LinkedList<_>, _, _>(1, print).holds());
-        assert!(applicative_map(LinkedList::pure(1), print).holds());
-        assert!(ap_product_consistent(LinkedList::pure(1), LinkedList::pure(print)).holds());
-        assert!(applicative_unit::<LinkedList<_>>(1).holds());
+    fn test_applicative(a: bool, fa in linked_list(any::<bool>(), 0..=1)) {
+        let ff= repeat(print).take(fa.len()).collect::<LinkedList<_>>();
+
+        assert!(applicative_identity(fa.clone()).holds());
+        assert!(applicative_homomorphism::<Vec<_>, _, _>(a, print).holds());
+        assert!(applicative_map(fa.clone(), print).holds());
+        assert!(ap_product_consistent(fa, ff).holds());
+        assert!(applicative_unit::<Vec<_>>(a).holds());
     }
+}
 
+proptest! {
     #[test]
-    fn test_flatmap() {
-        assert!(flat_map_associativity(
-            LinkedList::pure(1),
-            |x| LinkedList::pure(print(x)),
-            |x| LinkedList::pure(parse::<i32>(x))
-        )
-        .holds());
+    fn test_flatmap(fa in linked_list(any::<bool>(), 0..=1)) {
+        let ff= repeat(print).take(fa.len()).collect::<LinkedList<_>>();
 
-        assert!(flat_map_consistent_apply(LinkedList::pure(1), LinkedList::pure(print)).holds());
-
-        assert!(m_product_consistency(LinkedList::pure(1), |x| LinkedList::pure(print(x))).holds());
+        assert!(flat_map_associativity(fa.clone(), |x| LinkedList::pure(print(x)), |s| LinkedList::pure(parse::<bool>(s))).holds());
+        assert!(flat_map_associativity(fa.clone(), |_| LinkedList::new(), |s| LinkedList::pure(parse::<bool>(s))).holds());
+        assert!(flat_map_associativity(fa.clone(), |x| LinkedList::pure(print(x)), |_| LinkedList::<bool>::new()).holds());
+        assert!(flat_map_associativity(fa.clone(), |_| LinkedList::new(), |_: String| LinkedList::<bool>::new()).holds());
+        assert!(flat_map_consistent_apply(fa.clone(), ff).holds());
+        assert!(m_product_consistency(fa.clone(), |x| LinkedList::pure(print(x))).holds());
+        assert!(m_product_consistency(fa, |_| LinkedList::<String>::new()).holds());
     }
+}
 
+proptest! {
     #[test]
-    fn test_monad() {
-        assert!(monad_left_identity::<LinkedList<_>, _, _>(1, |x| LinkedList::pure(print(x))).holds());
-        assert!(monad_right_identity(LinkedList::pure(1)).holds());
-        assert!(map_flat_map_coherence(LinkedList::pure(1), print).holds());
+    fn test_monad(a: bool, fa: LinkedList<bool>) {
+        assert!(monad_left_identity::<LinkedList<_>, _, _>(a, |x| LinkedList::pure(print(x))).holds());
+        assert!(monad_left_identity::<LinkedList<_>, _, _>(a, |_| LinkedList::<String>::new()).holds());
+        assert!(monad_right_identity(fa.clone()).holds());
+        assert!(map_flat_map_coherence(fa, print).holds());
     }
 }
