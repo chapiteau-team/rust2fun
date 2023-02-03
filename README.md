@@ -1,3 +1,5 @@
+<img align="right" height="150" src="./rust2fun.svg">
+
 # rust2fun (pronounced: rʌstafʌn)
 
 [![Crates.io](https://img.shields.io/crates/v/rust2fun.svg)](https://crates.io/crates/rust2fun)
@@ -63,4 +65,5 @@ use rust2fun::prelude::*;
 ## Release notes
 
 0.1.0 (2023-01-22)
+
 - Initial release: combinators, Semigroupal, Invariant, Functor, Apply, Applicative, FlatMap, Monad
