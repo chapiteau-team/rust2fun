@@ -83,6 +83,7 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// let actual = x.product_r(y);
     /// assert_eq!(Some(2), actual);
     /// ```
+    #[inline]
     fn product_r(self, fb: Self::Target<B>) -> Self::Target<B>
     where
         Self::Target<(Self::Param, B)>: Functor<B, Target<B> = Self::Target<B>>,
@@ -103,6 +104,7 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// let actual = x.product_l(y);
     /// assert_eq!(Some(1), actual);
     /// ```
+    #[inline]
     fn product_l(self, fb: Self::Target<B>) -> Self
     where
         Self::Target<(Self::Param, B)>: Functor<Self::Param, Target<Self::Param> = Self>,

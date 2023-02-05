@@ -41,6 +41,7 @@
 
 use core::marker::PhantomData;
 
+use crate::combinator::noop1;
 use crate::constant1;
 use crate::higher::Higher;
 use crate::invariant::Invariant;
@@ -55,6 +56,7 @@ use crate::invariant::Invariant;
 /// let mut f = lift(|x: i32| x + 1);
 /// assert_eq!(Some(2), f(Some(1)));
 /// ```
+#[inline]
 pub fn lift<FA, B, F>(mut f: F) -> impl FnMut(FA) -> FA::Target<B>
 where
     FA: Functor<B>,
@@ -162,9 +164,9 @@ pub trait Functor<B>: Invariant<B> {
     #[inline]
     fn void(self) -> Self::Target<()>
     where
-        Self: Functor<(), Target<()> = B> + Sized,
+        Self: Functor<(), Target<()> = <Self as Higher>::Target<B>> + Sized,
     {
-        self.map_const(())
+        self.map(noop1)
     }
 
     /// Tuples the `A` value in `Self<A>` with the supplied `B` value, with the `B` value on the left.

@@ -3,7 +3,7 @@
 //! A combinator is a higher-order function that uses only function application and earlier defined
 //! combinators to define a result from its arguments.
 
-use rust2fun_macros::{constant_arity, curry_arity};
+use rust2fun_macros::{constant_arity, curry_arity, noop_arity, tuple_arity};
 
 /// Compose functions.
 ///
@@ -183,6 +183,65 @@ constant_arity!(9);
 pub const fn id<T>(x: T) -> T {
     x
 }
+
+/// Create a tuple of 2 elements.
+///
+/// # Example
+///
+/// ```
+/// use rust2fun::prelude::*;
+///
+/// let x = Some(1);
+/// let y = Some(2);
+/// let actual = x.map2(y, tuple2);
+/// assert_eq!(Some((1,2)), actual);
+/// ```
+#[inline]
+pub const fn tuple2<A, B>(a: A, b: B) -> (A, B) {
+    (a, b)
+}
+
+tuple_arity!(3);
+tuple_arity!(4);
+tuple_arity!(5);
+tuple_arity!(6);
+tuple_arity!(7);
+tuple_arity!(8);
+tuple_arity!(9);
+
+/// The no operation function.
+///
+/// # Example
+///
+/// ```
+/// use rust2fun::prelude::*;
+///
+/// noop();
+/// ```
+#[inline]
+pub const fn noop() {}
+
+/// The no operation function of 1 argument.
+///
+/// # Example
+///
+/// ```
+/// use rust2fun::prelude::*;
+///
+/// let actual = Some(1).map(noop1);
+/// assert_eq!(Some(()), actual);
+/// ```
+#[inline]
+pub fn noop1<T>(_: T) {}
+
+noop_arity!(2);
+noop_arity!(3);
+noop_arity!(4);
+noop_arity!(5);
+noop_arity!(6);
+noop_arity!(7);
+noop_arity!(8);
+noop_arity!(9);
 
 /// The apply function *apply(f, x) = f(x)* also known as A (Apply) combinator.
 /// It is the same as function application.

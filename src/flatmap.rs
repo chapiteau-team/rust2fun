@@ -40,6 +40,7 @@ pub trait FlatMap<B>: Apply<B> {
     /// let actual = Some(Some(1)).flatten();
     /// assert_eq!(Some(1), actual);
     /// ```
+    #[inline]
     fn flatten(self) -> Self::Target<B>
     where
         Self: FlatMap<B, Param = <Self as Higher>::Target<B>> + Sized,
@@ -78,6 +79,7 @@ pub trait FlatMap<B>: Apply<B> {
     /// let actual = x.if_m(constant!(Some(1)), constant!(Some(0)));
     /// assert_eq!(Some(1), actual);
     /// ```
+    #[inline]
     fn if_m<T, F>(self, mut if_true: T, mut if_false: F) -> Self::Target<B>
     where
         T: FnMut() -> Self::Target<B>,
@@ -104,6 +106,7 @@ pub trait FlatMap<B>: Apply<B> {
         Self::Param: Copy,
         Self::Target<B>: Functor<Self::Param, Target<Self::Param> = Self>,
     {
+        #[inline]
         fn internal<FA: FlatMap<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA>>(
             fa: FA,
             g: impl FnMut(FA::Param) -> FA,

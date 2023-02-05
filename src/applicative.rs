@@ -96,6 +96,7 @@ where
     /// let actual = Option::unit();
     /// assert_eq!(Some(()), actual);
     /// ```
+    #[inline]
     fn unit() -> Self
     where
         Self: Higher<Param = ()> + Sized,
