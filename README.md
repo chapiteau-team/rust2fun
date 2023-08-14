@@ -27,6 +27,68 @@ and import the prelude:
 use rust2fun::prelude::*;
 ```
 
+## Examples
+
+Function `print_user_credit_card` accepts user(s) wrapped in any effect (Option, Result, Vec, etc) and prints their
+credit card(s).
+
+```rust
+fn get_user(id: u32) -> Option<User> {
+    // Get user from database
+}
+
+fn get_all_users() -> Vec<User> {
+    // Get all users from database
+}
+
+fn get_credit_card(user: User) -> CreditCard {
+    // Get credit card for user
+}
+
+fn print_credit_card(card: CreditCard) {
+    // Print credit card details
+}
+
+fn print_user_credit_card<F>(user: F)
+    where
+        F: Functor<CreditCard, Param=User>,
+        F::Target<CreditCard>: Functor<(), Param=CreditCard>,
+{
+    user.map(get_credit_card).map(print_credit_card);
+}
+
+print_user_credit_card(get_user(1));
+print_user_credit_card(get_all_users());
+```
+
+Function `create_credit_card` validates data and creates a new credit card if everything is ok, otherwise returns the
+first appeared error.
+
+```rust
+fn validate_number(number: CreditCardNumber) -> Result<CreditCardNumber, Error> {
+    // Validating credit card number
+}
+
+fn validate_expiration(date: Date) -> Result<Date, Error> {
+    // Validating expiration date
+}
+
+fn validate_cvv(cvv: Code) -> Result<Code, Error> {
+    // Validating CVV code
+}
+
+fn create_credit_card(
+    number: CreditCardNumber,
+    expiration: Date,
+    cvv: Code,
+) -> Result<CreditCard, Error> {
+    Result::pure(curry3!(CreditCard::new))
+        .ap(validate_number(number))
+        .ap(validate_expiration(expiration))
+        .ap(validate_cvv(cvv))
+}
+```
+
 ## Supported features
 
 ### Combinators:
