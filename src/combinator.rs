@@ -91,6 +91,9 @@ curry_arity!(6);
 curry_arity!(7);
 curry_arity!(8);
 curry_arity!(9);
+curry_arity!(10);
+curry_arity!(11);
+curry_arity!(12);
 
 /// Flip arguments of a function *flip(f)(x, y) = f(y, x)* also known as C (Cardinal) combinator.
 ///
@@ -168,6 +171,9 @@ constant_arity!(6);
 constant_arity!(7);
 constant_arity!(8);
 constant_arity!(9);
+constant_arity!(10);
+constant_arity!(11);
+constant_arity!(12);
 
 /// The identity function *id(x) = x* also known as I (Idiot) combinator.
 ///
@@ -208,6 +214,9 @@ tuple_arity!(6);
 tuple_arity!(7);
 tuple_arity!(8);
 tuple_arity!(9);
+tuple_arity!(10);
+tuple_arity!(11);
+tuple_arity!(12);
 
 /// The no operation function.
 ///
@@ -242,6 +251,9 @@ noop_arity!(6);
 noop_arity!(7);
 noop_arity!(8);
 noop_arity!(9);
+noop_arity!(10);
+noop_arity!(11);
+noop_arity!(12);
 
 /// The apply function *apply(f, x) = f(x)* also known as A (Apply) combinator.
 /// It is the same as function application.

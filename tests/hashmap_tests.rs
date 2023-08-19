@@ -11,6 +11,7 @@ if_std! {
     use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
+    use rust2fun_laws::semigroup_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
 
     use crate::common::{parse, print};
@@ -31,6 +32,21 @@ if_std! {
             assert!(lift_identity(fa.clone()).holds());
             assert!(lift_composition(fa, print, parse::<bool>).holds());
         }
+    }
+
+    #[test]
+    fn test_semigroup() {
+        let mut fa = HashMap::new();
+        fa.insert(0, "a".to_owned());
+        fa.insert(2, "a".to_owned());
+        let mut fb = HashMap::new();
+        fb.insert(0, "b".to_owned());
+        fb.insert(1, "a".to_owned());
+        let fc = HashMap::new();
+
+        assert!(repeat_0(fa.clone()).holds());
+        assert!(repeat_1(fb.clone()).holds());
+        assert!(semigroup_associativity(fa, fb, fc).holds());
     }
 
     proptest! {

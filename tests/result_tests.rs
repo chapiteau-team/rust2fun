@@ -8,6 +8,7 @@ use rust2fun_laws::flatmap_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
 use rust2fun_laws::monad_laws::*;
+use rust2fun_laws::semigroup_laws::*;
 use rust2fun_laws::semigroupal_laws::*;
 
 use crate::common::{parse, print};
@@ -29,6 +30,15 @@ proptest! {
         assert!(covariant_composition(fa, print, parse::<bool>).holds());
         assert!(lift_identity(fa).holds());
         assert!(lift_composition(fa, print, parse::<bool>).holds());
+    }
+}
+
+proptest! {
+    #[test]
+    fn test_semigroup(fa: Result<(), u8>, fb: Result<(), u8>, fc: Result<(), u8>) {
+        assert!(repeat_0(fa.clone()).holds());
+        assert!(repeat_1(fb.clone()).holds());
+        assert!(semigroup_associativity(fa, fb, fc).holds());
     }
 }
 

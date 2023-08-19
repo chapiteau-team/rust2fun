@@ -9,6 +9,7 @@ use rust2fun_laws::flatmap_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
 use rust2fun_laws::monad_laws::*;
+use rust2fun_laws::semigroup_laws::*;
 use rust2fun_laws::semigroupal_laws::*;
 
 use crate::common::{parse, print};
@@ -35,6 +36,15 @@ fn test_contravariant() {
     assert!(contravariant_composition(PhantomData::<i32>, parse::<i32>, print::<u32>).holds());
     assert!(lift_contravariant_identity(PhantomData::<u32>).holds());
     assert!(lift_contravariant_composition(PhantomData::<i32>, parse::<i32>, print::<u32>).holds());
+}
+
+#[test]
+fn test_semigroup() {
+    assert!(repeat_0(PhantomData::<u32>).holds());
+    assert!(repeat_1(PhantomData::<u32>).holds());
+    assert!(
+        semigroup_associativity(PhantomData::<u32>, PhantomData::<u32>, PhantomData::<u32>).holds()
+    );
 }
 
 #[test]
