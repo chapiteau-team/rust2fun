@@ -185,7 +185,7 @@ constant_arity!(12);
 /// let actual = Some(1).map(id);
 /// assert_eq!(Some(1), actual);
 /// ```
-#[inline]
+#[inline(always)]
 pub const fn id<T>(x: T) -> T {
     x
 }
