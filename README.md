@@ -92,10 +92,26 @@ fn validate_credit_card(
   expiration: Date,
   cvv: Code,
 ) -> ValidatedNev<CreditCard, Error> {
-  ValidatedNev::pure(curry3!(CreditCard::new))
-          .ap(validate_number(number).into())
-          .ap(validate_expiration(expiration).into())
-          .ap(validate_cvv(cvv).into())
+  ValidatedNev::pure(CreditCard::new)
+          .ap3(validate_number(number).into(),
+               validate_expiration(expiration).into(),
+               validate_cvv(cvv).into())
+}
+```
+
+Alternatively, this can be done using the `map3` method:
+
+```rust
+fn validate_credit_card(
+    number: CreditCardNumber,
+    expiration: Date,
+    cvv: Code,
+) -> ValidatedNev<CreditCard, Error> {
+    let number: ValidatedNev<_,_> = validate_number(number).into();
+    let expiration = validate_expiration(expiration).into();
+    let cvv = validate_cvv(cvv).into();
+
+    Apply::map3(number, expiration, cvv, CreditCard::new)
 }
 ```
 

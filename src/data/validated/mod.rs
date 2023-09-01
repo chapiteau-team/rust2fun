@@ -40,15 +40,15 @@
 //! #     }
 //! # }
 //! #
-//! fn validate_number(number: CreditCardNumber) -> Validated<CreditCardNumber, Error> {
+//! fn validate_number(number: CreditCardNumber) -> ValidatedNev<CreditCardNumber, Error> {
 //!     unimplemented!("Validate credit card number")
 //! }
 //!
-//! fn validate_expiration(date: Date) -> Validated<Date, Error> {
+//! fn validate_expiration(date: Date) -> ValidatedNev<Date, Error> {
 //!     unimplemented!("Validate credit card expiration date")
 //! }
 //!
-//! fn validate_cvv(cvv: Code) -> Validated<Code, Error> {
+//! fn validate_cvv(cvv: Code) -> ValidatedNev<Code, Error> {
 //!     unimplemented!("Validate credit card cvv")
 //! }
 //!
@@ -57,10 +57,22 @@
 //!     expiration: Date,
 //!     cvv: Code,
 //! ) -> ValidatedNev<CreditCard, Error> {
-//!     ValidatedNev::pure(curry3!(CreditCard::new))
-//!         .ap(validate_number(number).into())
-//!         .ap(validate_expiration(expiration).into())
-//!         .ap(validate_cvv(cvv).into())
+//!     ValidatedNev::pure(CreditCard::new)
+//!         .ap3(validate_number(number),
+//!              validate_expiration(expiration),
+//!              validate_cvv(cvv))
+//! }
+//!
+//! // Alternative implementation using `map3`:
+//! fn validate_credit_card_alt(
+//!     number: CreditCardNumber,
+//!     expiration: Date,
+//!     cvv: Code,
+//! ) -> ValidatedNev<CreditCard, Error> {
+//!     Apply::map3(validate_number(number),
+//!                 validate_expiration(expiration),
+//!                 validate_cvv(cvv),
+//!                 CreditCard::new)
 //! }
 //! ```
 pub use Validated::{Invalid, Valid};
