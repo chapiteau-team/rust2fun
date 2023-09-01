@@ -19,18 +19,28 @@ if_std! {
     proptest! {
         #[test]
         fn test_invariant(fa: HashMap::<i32, bool>) {
-            assert!(invariant_identity(fa.clone()).holds());
-            assert!(invariant_composition(fa, print, parse, parse::<bool>, print).holds());
+            prop_assert!(invariant_identity(fa.clone()).holds());
+            prop_assert!(invariant_composition(fa, print, parse, parse::<bool>, print).holds());
         }
-    }
 
-    proptest! {
         #[test]
         fn test_functor(fa: HashMap::<i32, bool>) {
-            assert!(covariant_identity(fa.clone()).holds());
-            assert!(covariant_composition(fa.clone(), print, parse::<bool>).holds());
-            assert!(lift_identity(fa.clone()).holds());
-            assert!(lift_composition(fa, print, parse::<bool>).holds());
+            prop_assert!(covariant_identity(fa.clone()).holds());
+            prop_assert!(covariant_composition(fa.clone(), print, parse::<bool>).holds());
+            prop_assert!(lift_identity(fa.clone()).holds());
+            prop_assert!(lift_composition(fa, print, parse::<bool>).holds());
+        }
+
+        #[test]
+        fn test_semigroupal(fa: HashMap::<i32, bool>, fb:HashMap::<i32, usize>, fc: HashMap<i32, Result<String, u8>>) {
+            prop_assert!(semigroupal_associativity(fa, fb, fc).holds());
+        }
+
+        #[test]
+        fn test_apply(fa: HashMap<i32, String>, fb: HashMap<i32, usize>) {
+            prop_assert!(map2_product_consistency(fa.clone(), fb.clone(), |a, b| a.len() == b).holds());
+            prop_assert!(product_r_consistency(fa.clone(), fb.clone()).holds());
+            prop_assert!(product_l_consistency(fa, fb).holds());
         }
     }
 
@@ -47,22 +57,6 @@ if_std! {
         assert!(repeat_0(fa.clone()).holds());
         assert!(repeat_1(fb.clone()).holds());
         assert!(semigroup_associativity(fa, fb, fc).holds());
-    }
-
-    proptest! {
-        #[test]
-        fn test_semigroupal(fa: HashMap::<i32, bool>, fb:HashMap::<i32, usize>, fc: HashMap<i32, Result<String, u8>>) {
-            assert!(semigroupal_associativity(fa, fb, fc).holds());
-        }
-    }
-
-    proptest! {
-        #[test]
-        fn test_apply(fa: HashMap<i32, String>, fb: HashMap<i32, usize>) {
-            assert!(map2_product_consistency(fa.clone(), fb.clone(), |a, b| a.len() == b).holds());
-            assert!(product_r_consistency(fa.clone(), fb.clone()).holds());
-            assert!(product_l_consistency(fa, fb).holds());
-        }
     }
 
     #[test]
