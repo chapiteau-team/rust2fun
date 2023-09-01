@@ -385,8 +385,8 @@ impl<T, E> Validated<T, E> {
     /// ```
     #[inline]
     pub fn as_deref(&self) -> Validated<&T::Target, &E>
-        where
-            T: core::ops::Deref,
+    where
+        T: core::ops::Deref,
     {
         self.as_ref().map(|x| x.deref())
     }
@@ -414,8 +414,8 @@ impl<T, E> Validated<T, E> {
     /// ```
     #[inline]
     pub fn as_deref_mut(&mut self) -> Validated<&mut T::Target, &mut E>
-        where
-            T: core::ops::DerefMut,
+    where
+        T: core::ops::DerefMut,
     {
         self.as_mut().map(|x| x.deref_mut())
     }
@@ -447,8 +447,8 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn expect(self, msg: &str) -> T
-        where
-            E: core::fmt::Debug,
+    where
+        E: core::fmt::Debug,
     {
         match self {
             Valid(x) => x,
@@ -492,8 +492,8 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn unwrap(self) -> T
-        where
-            E: core::fmt::Debug,
+    where
+        E: core::fmt::Debug,
     {
         match self {
             Valid(x) => x,
@@ -519,8 +519,8 @@ impl<T, E> Validated<T, E> {
     /// ```
     #[inline]
     pub fn unwrap_or_default(self) -> T
-        where
-            T: Default,
+    where
+        T: Default,
     {
         match self {
             Valid(x) => x,
@@ -546,8 +546,8 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn expect_err(self, msg: &str) -> E
-        where
-            T: core::fmt::Debug,
+    where
+        T: core::fmt::Debug,
     {
         match self {
             Valid(x) => unwrap_failed(msg, &x),
@@ -580,8 +580,8 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn unwrap_err(self) -> E
-        where
-            T: core::fmt::Debug,
+    where
+        T: core::fmt::Debug,
     {
         match self {
             Valid(x) => unwrap_failed("called `Validated::unwrap_err()` on a `Valid` value", &x),
@@ -778,9 +778,9 @@ fn unwrap_failed(msg: &str, error: &dyn core::fmt::Debug) -> ! {
 }
 
 impl<T, E> Clone for Validated<T, E>
-    where
-        T: Clone,
-        E: Clone,
+where
+    T: Clone,
+    E: Clone,
 {
     fn clone(&self) -> Self {
         match self {
@@ -826,8 +826,8 @@ impl<A, B, E: Semigroup> Semigroupal<B> for Validated<A, E> {
 impl<F, B, E: Semigroup> Apply<B> for Validated<F, E> {
     #[inline]
     fn ap<A>(self, fa: Validated<A, E>) -> Validated<B, E>
-        where
-            Self::Param: FnOnce(A) -> B,
+    where
+        Self::Param: FnOnce(A) -> B,
     {
         match (self, fa) {
             (Valid(f), Valid(a)) => Valid(f(a)),

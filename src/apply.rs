@@ -20,8 +20,8 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// assert_eq!(Some("2".to_string()), f.ap(Some(2)));
     /// ```
     fn ap<A>(self, fa: Self::Target<A>) -> Self::Target<B>
-        where
-            Self::Param: FnOnce(A) -> B;
+    where
+        Self::Param: FnOnce(A) -> B;
 
     /// Is a binary version of [ap].
     ///
@@ -35,13 +35,13 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// ```
     #[inline]
     fn ap2<A, Z>(self, fa: Self::Target<A>, fb: Self::Target<B>) -> Self::Target<Z>
-        where
-            Self::Param: FnOnce(A, B) -> Z,
-            Self::Target<(Self::Param, B)>: Semigroupal<A>
-            + Higher<Target<A>=Self::Target<A>>
-            + Higher<Target<((Self::Param, B), A)>=Self::Target<((Self::Param, B), A)>>,
-            Self::Target<((Self::Param, B), A)>: Functor<Z, Target<Z>=Self::Target<Z>>,
-            Self: Sized,
+    where
+        Self::Param: FnOnce(A, B) -> Z,
+        Self::Target<(Self::Param, B)>: Semigroupal<A>
+            + Higher<Target<A> = Self::Target<A>>
+            + Higher<Target<((Self::Param, B), A)> = Self::Target<((Self::Param, B), A)>>,
+        Self::Target<((Self::Param, B), A)>: Functor<Z, Target<Z> = Self::Target<Z>>,
+        Self: Sized,
     {
         self.product(fb).product(fa).map(|((f, b), a)| f(a, b))
     }
@@ -57,19 +57,27 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// assert_eq!(Some(6), f.ap3(Some(1), Some(2), Some(3)));
     /// ```
     #[inline]
-    fn ap3<A, C, Z>(self, fa: Self::Target<A>, fb: Self::Target<B>, fc: Self::Target<C>) -> Self::Target<Z>
-        where
-            Self::Param: FnOnce(A, B, C) -> Z,
-            Self::Target<(Self::Param, B)>: Semigroupal<A>
-            + Higher<Target<A>=Self::Target<A>>
-            + Higher<Target<((Self::Param, B), A)>=Self::Target<((Self::Param, B), A)>>,
-            Self::Target<((Self::Param, B), A)>: Semigroupal<C>
-            + Higher<Target<C>=Self::Target<C>>
-            + Higher<Target<(((Self::Param, B), A), C)>=Self::Target<(((Self::Param, B), A), C)>>,
-            Self::Target<(((Self::Param, B), A), C)>: Functor<Z, Target<Z>=Self::Target<Z>>,
-            Self: Sized,
+    fn ap3<A, C, Z>(
+        self,
+        fa: Self::Target<A>,
+        fb: Self::Target<B>,
+        fc: Self::Target<C>,
+    ) -> Self::Target<Z>
+    where
+        Self::Param: FnOnce(A, B, C) -> Z,
+        Self::Target<(Self::Param, B)>: Semigroupal<A>
+            + Higher<Target<A> = Self::Target<A>>
+            + Higher<Target<((Self::Param, B), A)> = Self::Target<((Self::Param, B), A)>>,
+        Self::Target<((Self::Param, B), A)>: Semigroupal<C>
+            + Higher<Target<C> = Self::Target<C>>
+            + Higher<Target<(((Self::Param, B), A), C)> = Self::Target<(((Self::Param, B), A), C)>>,
+        Self::Target<(((Self::Param, B), A), C)>: Functor<Z, Target<Z> = Self::Target<Z>>,
+        Self: Sized,
     {
-        self.product(fb).product(fa).product(fc).map(|(((f, b), a), c)| f(a, b, c))
+        self.product(fb)
+            .product(fa)
+            .product(fc)
+            .map(|(((f, b), a), c)| f(a, b, c))
     }
 
     /// Combine two effectful values into a single effectful value using a binary function.
@@ -86,10 +94,10 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// ```
     #[inline]
     fn map2<Z, F>(self, fb: Self::Target<B>, mut f: F) -> Self::Target<Z>
-        where
-            F: FnMut(Self::Param, B) -> Z,
-            Self::Target<(Self::Param, B)>: Functor<Z, Target<Z>=Self::Target<Z>>,
-            Self: Sized,
+    where
+        F: FnMut(Self::Param, B) -> Z,
+        Self::Target<(Self::Param, B)>: Functor<Z, Target<Z> = Self::Target<Z>>,
+        Self: Sized,
     {
         self.product(fb).map(|(a, b)| f(a, b))
     }
@@ -109,12 +117,15 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// ```
     #[inline]
     fn map3<C, Z, F>(self, fb: Self::Target<B>, fc: Self::Target<C>, mut f: F) -> Self::Target<Z>
-        where F: FnMut(Self::Param, B, C) -> Z,
-              Self::Target<(Self::Param, B)>: Apply<C, Target<C>=Self::Target<C>>,
-              Self::Target<(Self::Param, B)>: Higher<Target<Z>=Self::Target<Z>>,
-              <Self::Target<(Self::Param, B)> as Higher>::Target<((Self::Param, B), C)>: Functor<Z, Target<Z>=Self::Target<Z>>,
-              Self: Sized, {
-        self.product(fb).map2(fc, |(a, b), c| { f(a, b, c) })
+    where
+        F: FnMut(Self::Param, B, C) -> Z,
+        Self::Target<(Self::Param, B)>: Apply<C, Target<C> = Self::Target<C>>,
+        Self::Target<(Self::Param, B)>: Higher<Target<Z> = Self::Target<Z>>,
+        <Self::Target<(Self::Param, B)> as Higher>::Target<((Self::Param, B), C)>:
+            Functor<Z, Target<Z> = Self::Target<Z>>,
+        Self: Sized,
+    {
+        self.product(fb).map2(fc, |(a, b), c| f(a, b, c))
     }
 
     /// Compose two effectful values discarding the result of the first.
@@ -131,9 +142,9 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// ```
     #[inline]
     fn product_r(self, fb: Self::Target<B>) -> Self::Target<B>
-        where
-            Self::Target<(Self::Param, B)>: Functor<B, Target<B>=Self::Target<B>>,
-            Self: Sized,
+    where
+        Self::Target<(Self::Param, B)>: Functor<B, Target<B> = Self::Target<B>>,
+        Self: Sized,
     {
         self.map2(fb, |_, b| b)
     }
@@ -152,9 +163,9 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     /// ```
     #[inline]
     fn product_l(self, fb: Self::Target<B>) -> Self
-        where
-            Self::Target<(Self::Param, B)>: Functor<Self::Param, Target<Self::Param>=Self>,
-            Self: Higher<Target<<Self as Higher>::Param>=Self> + Sized,
+    where
+        Self::Target<(Self::Param, B)>: Functor<Self::Param, Target<Self::Param> = Self>,
+        Self: Higher<Target<<Self as Higher>::Param> = Self> + Sized,
     {
         self.map2(fb, |a, _| a)
     }
@@ -196,8 +207,8 @@ macro_rules! apply_iter {
 impl<F, B> Apply<B> for PhantomData<F> {
     #[inline]
     fn ap<A>(self, _fa: PhantomData<A>) -> PhantomData<B>
-        where
-            Self::Param: FnOnce(A) -> B,
+    where
+        Self::Param: FnOnce(A) -> B,
     {
         PhantomData
     }
@@ -206,8 +217,8 @@ impl<F, B> Apply<B> for PhantomData<F> {
 impl<F, B> Apply<B> for Option<F> {
     #[inline]
     fn ap<A>(self, fa: Option<A>) -> Option<B>
-        where
-            Self::Param: FnOnce(A) -> B,
+    where
+        Self::Param: FnOnce(A) -> B,
     {
         self.and_then(|f| fa.map(f))
     }
@@ -216,8 +227,8 @@ impl<F, B> Apply<B> for Option<F> {
 impl<F, B, E> Apply<B> for Result<F, E> {
     #[inline]
     fn ap<A>(self, fa: Result<A, E>) -> Result<B, E>
-        where
-            Self::Param: FnOnce(A) -> B,
+    where
+        Self::Param: FnOnce(A) -> B,
     {
         self.and_then(|f| fa.map(f))
     }

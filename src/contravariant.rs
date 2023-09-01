@@ -15,7 +15,9 @@ use crate::invariant::Invariant;
 /// let mut f = lift_contravariant(|x: i32| x.to_string());
 /// assert_eq!(PhantomData::<i32>, f(PhantomData::<String>));
 /// ```
-pub fn lift_contravariant<FA, B>(mut f: impl FnMut(B) -> FA::Param) -> impl FnMut(FA) -> FA::Target<B>
+pub fn lift_contravariant<FA, B>(
+    mut f: impl FnMut(B) -> FA::Param,
+) -> impl FnMut(FA) -> FA::Target<B>
 where
     FA: Contravariant<B>,
 {
