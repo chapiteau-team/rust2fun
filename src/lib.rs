@@ -34,12 +34,11 @@ pub mod semigroupal;
 
 /// Convenience re-export of common members of the library.
 pub mod prelude {
-    pub use crate::*;
     pub use crate::applicative::*;
     pub use crate::apply::*;
     pub use crate::combinator::*;
     pub use crate::contravariant::*;
-    pub use crate::data::validated::*;
+    pub use crate::data::*;
     pub use crate::flatmap::*;
     pub use crate::functor::*;
     pub use crate::higher::*;
@@ -47,4 +46,5 @@ pub mod prelude {
     pub use crate::monad::*;
     pub use crate::semigroup::*;
     pub use crate::semigroupal::*;
+    pub use crate::*;
 }

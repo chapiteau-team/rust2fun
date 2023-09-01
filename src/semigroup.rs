@@ -132,9 +132,7 @@ macro_rules! semigroup_extend {
 }
 
 impl Semigroup for () {
-    fn combine(self, _other: Self) -> Self {
-        ()
-    }
+    fn combine(self, _other: Self) -> Self {}
 }
 
 impl<T> Semigroup for PhantomData<T> {

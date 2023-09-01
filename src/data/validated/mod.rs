@@ -13,6 +13,56 @@
 //! Note that unlike [`Result`] [`Validated`] is not a monad, but it is an applicative functor,
 //! so it is possible to use it with functions that operate on [`Validated`] values in an
 //! applicative style.
+//!
+//! # Examples
+//!
+//! ```
+//! use rust2fun::prelude::*;
+//!
+//! # struct CreditCardNumber;
+//! # struct Date;
+//! # struct Code;
+//! # struct Error;
+//! #
+//! # struct CreditCard {
+//! #     number: CreditCardNumber,
+//! #     expiration: Date,
+//! #     cvv: Code,
+//! # }
+//! #
+//! # impl CreditCard {
+//! #     fn new(number: CreditCardNumber, expiration: Date, cvv: Code) -> Self {
+//! #         CreditCard {
+//! #             number,
+//! #             expiration,
+//! #             cvv,
+//! #         }
+//! #     }
+//! # }
+//! #
+//! fn validate_number(number: CreditCardNumber) -> Validated<CreditCardNumber, Error> {
+//!     unimplemented!("Validate credit card number")
+//! }
+//!
+//! fn validate_expiration(date: Date) -> Validated<Date, Error> {
+//!     unimplemented!("Validate credit card expiration date")
+//! }
+//!
+//! fn validate_cvv(cvv: Code) -> Validated<Code, Error> {
+//!     unimplemented!("Validate credit card cvv")
+//! }
+//!
+//! fn validate_credit_card(
+//!     number: CreditCardNumber,
+//!     expiration: Date,
+//!     cvv: Code,
+//! ) -> ValidatedNev<CreditCard, Error> {
+//!     ValidatedNev::pure(curry3!(CreditCard::new))
+//!         .ap(validate_number(number).into())
+//!         .ap(validate_expiration(expiration).into())
+//!         .ap(validate_cvv(cvv).into())
+//! }
+//! ```
 pub use Validated::{Invalid, Valid};
 
 use crate::applicative::Applicative;
@@ -22,6 +72,12 @@ use crate::higher::Higher;
 use crate::invariant_functor;
 use crate::semigroup::Semigroup;
 use crate::semigroupal::Semigroupal;
+
+mod from;
+
+/// Type alias for a [`Validated`] value accumulating errors in a non-empty vector.
+#[cfg(feature = "std")]
+pub type ValidatedNev<T, E> = Validated<T, super::NEVec<E>>;
 
 /// `Validated` is a type that represents either a [`Valid`] value or an error([`Invalid`]).
 ///
@@ -317,8 +373,8 @@ impl<T, E> Validated<T, E> {
     /// ```
     #[inline]
     pub fn as_deref(&self) -> Validated<&T::Target, &E>
-    where
-        T: core::ops::Deref,
+        where
+            T: core::ops::Deref,
     {
         self.as_ref().map(|x| x.deref())
     }
@@ -346,8 +402,8 @@ impl<T, E> Validated<T, E> {
     /// ```
     #[inline]
     pub fn as_deref_mut(&mut self) -> Validated<&mut T::Target, &mut E>
-    where
-        T: core::ops::DerefMut,
+        where
+            T: core::ops::DerefMut,
     {
         self.as_mut().map(|x| x.deref_mut())
     }
@@ -379,12 +435,12 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn expect(self, msg: &str) -> T
-    where
-        E: core::fmt::Debug,
+        where
+            E: core::fmt::Debug,
     {
         match self {
             Valid(x) => x,
-            Invalid(e) => panic!("{msg}: {e:?}"),
+            Invalid(e) => unwrap_failed(msg, &e),
         }
     }
 
@@ -424,12 +480,12 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn unwrap(self) -> T
-    where
-        E: core::fmt::Debug,
+        where
+            E: core::fmt::Debug,
     {
         match self {
             Valid(x) => x,
-            Invalid(e) => panic!("called `Validated::unwrap()` on an `Invalid` value: {e:?}"),
+            Invalid(e) => unwrap_failed("called `Validated::unwrap()` on an `Invalid` value", &e),
         }
     }
 
@@ -451,8 +507,8 @@ impl<T, E> Validated<T, E> {
     /// ```
     #[inline]
     pub fn unwrap_or_default(self) -> T
-    where
-        T: Default,
+        where
+            T: Default,
     {
         match self {
             Valid(x) => x,
@@ -478,11 +534,11 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn expect_err(self, msg: &str) -> E
-    where
-        T: core::fmt::Debug,
+        where
+            T: core::fmt::Debug,
     {
         match self {
-            Valid(x) => panic!("{msg}: {x:?}"),
+            Valid(x) => unwrap_failed(msg, &x),
             Invalid(x) => x,
         }
     }
@@ -512,11 +568,11 @@ impl<T, E> Validated<T, E> {
     #[inline]
     #[track_caller]
     pub fn unwrap_err(self) -> E
-    where
-        T: core::fmt::Debug,
+        where
+            T: core::fmt::Debug,
     {
         match self {
-            Valid(x) => panic!("called `Validated::unwrap_err()` on a `Valid` value: {x:?}"),
+            Valid(x) => unwrap_failed("called `Validated::unwrap_err()` on a `Valid` value", &x),
             Invalid(x) => x,
         }
     }
@@ -701,10 +757,18 @@ impl<T, E> Validated<T, E> {
     }
 }
 
+// This is a separate function to reduce the code size of the methods
+#[inline(never)]
+#[cold]
+#[track_caller]
+fn unwrap_failed(msg: &str, error: &dyn core::fmt::Debug) -> ! {
+    panic!("{msg}: {error:?}")
+}
+
 impl<T, E> Clone for Validated<T, E>
-where
-    T: Clone,
-    E: Clone,
+    where
+        T: Clone,
+        E: Clone,
 {
     fn clone(&self) -> Self {
         match self {
@@ -718,16 +782,6 @@ where
             (Valid(to), Valid(from)) => to.clone_from(from),
             (Invalid(to), Invalid(from)) => to.clone_from(from),
             (x, y) => *x = y.clone(),
-        }
-    }
-}
-
-impl<T, E> From<Result<T, E>> for Validated<T, E> {
-    #[inline]
-    fn from(result: Result<T, E>) -> Self {
-        match result {
-            Ok(x) => Valid(x),
-            Err(x) => Invalid(x),
         }
     }
 }
@@ -760,8 +814,8 @@ impl<A, B, E: Semigroup> Semigroupal<B> for Validated<A, E> {
 impl<F, B, E: Semigroup> Apply<B> for Validated<F, E> {
     #[inline]
     fn ap<A>(self, fa: Validated<A, E>) -> Validated<B, E>
-    where
-        Self::Param: FnOnce(A) -> B,
+        where
+            Self::Param: FnOnce(A) -> B,
     {
         match (self, fa) {
             (Valid(f), Valid(a)) => Valid(f(a)),

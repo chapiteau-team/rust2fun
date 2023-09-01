@@ -18,7 +18,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rust2fun = "0.1.0"
+rust2fun = "0.2.0"
 ```
 
 and import the prelude:
@@ -29,18 +29,10 @@ use rust2fun::prelude::*;
 
 ## Examples
 
-Function `print_user_credit_card` accepts user(s) wrapped in any effect (Option, Result, Vec, etc) and prints their
-credit card(s).
+1. Function `print_user_credit_card` accepts user(s) wrapped in any effect (Option, Result, Vec, etc.) and prints
+corresponding credit card(s).
 
 ```rust
-fn get_user(id: u32) -> Option<User> {
-    // Get user from database
-}
-
-fn get_all_users() -> Vec<User> {
-    // Get all users from database
-}
-
 fn get_credit_card(user: User) -> CreditCard {
     // Get credit card for user
 }
@@ -56,36 +48,54 @@ fn print_user_credit_card<F>(user: F)
 {
     user.map(get_credit_card).map(print_credit_card);
 }
+```
+
+Usage:
+
+```rust
+fn get_user(id: u32) -> Option<User> {
+  // Get user from database
+}
+
+fn get_all_users() -> Vec<User> {
+  // Get all users from database
+}
 
 print_user_credit_card(get_user(1));
 print_user_credit_card(get_all_users());
 ```
 
-Function `create_credit_card` validates data and creates a new credit card if everything is ok, otherwise returns the
-first appeared error.
+2. Validation accumulating all errors.
+
+Assuming we have the following validation rules that need to be applied to create a new credit card:
 
 ```rust
 fn validate_number(number: CreditCardNumber) -> Result<CreditCardNumber, Error> {
-    // Validating credit card number
+  // Validating credit card number
 }
 
 fn validate_expiration(date: Date) -> Result<Date, Error> {
-    // Validating expiration date
+  // Validating expiration date
 }
 
 fn validate_cvv(cvv: Code) -> Result<Code, Error> {
-    // Validating CVV code
+  // Validating CVV code
 }
+```
 
-fn create_credit_card(
-    number: CreditCardNumber,
-    expiration: Date,
-    cvv: Code,
-) -> Result<CreditCard, Error> {
-    Result::pure(curry3!(CreditCard::new))
-        .ap(validate_number(number))
-        .ap(validate_expiration(expiration))
-        .ap(validate_cvv(cvv))
+We can create a new credit card by applying all validation rules and collecting all errors in a vector `Vec`,
+non-empty vector `NEVec` (like in the example) or other semigroup (e.g. `String`, `u32`, etc.):
+
+```rust
+fn validate_credit_card(
+  number: CreditCardNumber,
+  expiration: Date,
+  cvv: Code,
+) -> ValidatedNev<CreditCard, Error> {
+  ValidatedNev::pure(curry3!(CreditCard::new))
+          .ap(validate_number(number).into())
+          .ap(validate_expiration(expiration).into())
+          .ap(validate_cvv(cvv).into())
 }
 ```
 
@@ -123,6 +133,12 @@ fn create_credit_card(
 - [Applicative](https://docs.rs/rust2fun/0.1.0/rust2fun/applicative/trait.Applicative.html)
 - [FlatMap](https://docs.rs/rust2fun/0.1.0/rust2fun/flatmap/trait.FlatMap.html)
 - [Monad](https://docs.rs/rust2fun/0.1.0/rust2fun/monad/trait.Monad.html)
+
+### Data types:
+
+- non-empty vector (NEVec)
+- Validated
+- ValidatedNev
 
 ## Release notes
 
