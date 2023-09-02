@@ -83,7 +83,7 @@ fn print_credit_card(card: CreditCard) {
     // Print credit card details
 }
 
-fn print_user_credit_card<F>(user: F)
+fn print_credit_card_of<F>(user: F)
     where
         F: Functor<CreditCard, Param=User>,
         F::Target<CreditCard>: Functor<(), Param=CreditCard>,
@@ -95,16 +95,16 @@ fn print_user_credit_card<F>(user: F)
 ...usage:
 
 ```rust
-fn get_user(id: u32) -> Option<User> {
+fn user(id: u32) -> Option<User> {
     // Get user from database
 }
 
-fn get_all_users() -> Vec<User> {
+fn all_users() -> Vec<User> {
     // Get all users from database
 }
 
-print_user_credit_card(get_user(1));
-print_user_credit_card(get_all_users());
+print_credit_card_of(user(1));
+print_credit_card_of(all_users());
 ```
 
 2. Validation accumulating all errors.
