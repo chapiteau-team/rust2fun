@@ -27,94 +27,6 @@ and import the prelude:
 use rust2fun::prelude::*;
 ```
 
-## Examples
-
-1. Function `print_user_credit_card` accepts user(s) wrapped in any effect (Option, Result, Vec, etc.) and prints
-corresponding credit card(s).
-
-```rust
-fn get_credit_card(user: User) -> CreditCard {
-    // Get credit card for user
-}
-
-fn print_credit_card(card: CreditCard) {
-    // Print credit card details
-}
-
-fn print_user_credit_card<F>(user: F)
-    where
-        F: Functor<CreditCard, Param=User>,
-        F::Target<CreditCard>: Functor<(), Param=CreditCard>,
-{
-    user.map(get_credit_card).map(print_credit_card);
-}
-```
-
-Usage:
-
-```rust
-fn get_user(id: u32) -> Option<User> {
-  // Get user from database
-}
-
-fn get_all_users() -> Vec<User> {
-  // Get all users from database
-}
-
-print_user_credit_card(get_user(1));
-print_user_credit_card(get_all_users());
-```
-
-2. Validation accumulating all errors.
-
-Assuming we have the following validation rules that need to be applied to create a new credit card:
-
-```rust
-fn validate_number(number: CreditCardNumber) -> Result<CreditCardNumber, Error> {
-  // Validating credit card number
-}
-
-fn validate_expiration(date: Date) -> Result<Date, Error> {
-  // Validating expiration date
-}
-
-fn validate_cvv(cvv: Code) -> Result<Code, Error> {
-  // Validating CVV code
-}
-```
-
-We can create a new credit card by applying all validation rules and collecting all errors in a vector `Vec`,
-non-empty vector `NEVec` (like in the example) or other semigroup (e.g. `String`, `u32`, etc.):
-
-```rust
-fn validate_credit_card(
-  number: CreditCardNumber,
-  expiration: Date,
-  cvv: Code,
-) -> ValidatedNev<CreditCard, Error> {
-  ValidatedNev::pure(CreditCard::new)
-          .ap3(validate_number(number).into(),
-               validate_expiration(expiration).into(),
-               validate_cvv(cvv).into())
-}
-```
-
-Alternatively, this can be done using the `map3` method:
-
-```rust
-fn validate_credit_card(
-    number: CreditCardNumber,
-    expiration: Date,
-    cvv: Code,
-) -> ValidatedNev<CreditCard, Error> {
-    let number: ValidatedNev<_,_> = validate_number(number).into();
-    let expiration = validate_expiration(expiration).into();
-    let cvv = validate_cvv(cvv).into();
-
-    Apply::map3(number, expiration, cvv, CreditCard::new)
-}
-```
-
 ## Supported features
 
 ### Combinators:
@@ -142,6 +54,7 @@ fn validate_credit_card(
 
 ### Type classes:
 
+- Semigroup
 - [Semigroupal](https://docs.rs/rust2fun/0.1.0/rust2fun/semigroupal/trait.Semigroupal.html)
 - [Invariant](https://docs.rs/rust2fun/0.1.0/rust2fun/invariant/trait.Invariant.html)
 - [Functor](https://docs.rs/rust2fun/0.1.0/rust2fun/functor/trait.Functor.html)
@@ -155,6 +68,94 @@ fn validate_credit_card(
 - non-empty vector (NEVec)
 - Validated
 - ValidatedNev
+
+## Examples
+
+1. Function `print_user_credit_card` accepts user(s) wrapped in any effect (Option, Result, Vec, etc.) and prints
+   corresponding credit card(s).
+
+```rust
+fn get_credit_card(user: User) -> CreditCard {
+    // Get credit card for user
+}
+
+fn print_credit_card(card: CreditCard) {
+    // Print credit card details
+}
+
+fn print_user_credit_card<F>(user: F)
+    where
+        F: Functor<CreditCard, Param=User>,
+        F::Target<CreditCard>: Functor<(), Param=CreditCard>,
+{
+    user.map(get_credit_card).map(print_credit_card);
+}
+```
+
+...usage:
+
+```rust
+fn get_user(id: u32) -> Option<User> {
+    // Get user from database
+}
+
+fn get_all_users() -> Vec<User> {
+    // Get all users from database
+}
+
+print_user_credit_card(get_user(1));
+print_user_credit_card(get_all_users());
+```
+
+2. Validation accumulating all errors.
+
+Assuming we have the following validation rules that need to be applied to create a new credit card:
+
+```rust
+fn validate_number(number: CreditCardNumber) -> Result<CreditCardNumber, Error> {
+    // Validating credit card number
+}
+
+fn validate_expiration(date: Date) -> Result<Date, Error> {
+    // Validating expiration date
+}
+
+fn validate_cvv(cvv: Code) -> Result<Code, Error> {
+    // Validating CVV code
+}
+```
+
+...we can create a new credit card by applying all validation rules and collecting all errors in a vector `Vec`,
+non-empty vector `NEVec` (like in the example) or other semigroup (e.g. `String`, `u32`, etc.):
+
+```rust
+fn validate_credit_card(
+    number: CreditCardNumber,
+    expiration: Date,
+    cvv: Code,
+) -> ValidatedNev<CreditCard, Error> {
+    ValidatedNev::pure(CreditCard::new)
+        .ap3(validate_number(number).into(),
+             validate_expiration(expiration).into(),
+             validate_cvv(cvv).into())
+}
+```
+
+...alternatively, this can be done using the `map3` method:
+
+```rust
+fn validate_credit_card(
+    number: CreditCardNumber,
+    expiration: Date,
+    cvv: Code,
+) -> ValidatedNev<CreditCard, Error> {
+    let number: ValidatedNev<_, _> = validate_number(number).into();
+    let expiration = validate_expiration(expiration).into();
+    let cvv = validate_cvv(cvv).into();
+
+    Apply::map3(number, expiration, cvv, CreditCard::new)
+}
+```
 
 ## Release notes
 

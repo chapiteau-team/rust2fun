@@ -2,6 +2,8 @@
 
 use core::marker::PhantomData;
 
+use rust2fun_macros::apply_ap;
+
 use crate::functor::Functor;
 use crate::prelude::Higher;
 use crate::semigroupal::Semigroupal;
@@ -23,7 +25,7 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     where
         Self::Param: FnOnce(A) -> B;
 
-    /// Is a binary version of [ap].
+    /// Is a binary version of [Apply::ap].
     ///
     /// # Examples
     ///
@@ -46,7 +48,7 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
         self.product(fb).product(fa).map(|((f, b), a)| f(a, b))
     }
 
-    /// Is a ternary version of [ap].
+    /// Is a ternary version of [Apply::ap].
     ///
     /// # Examples
     ///
@@ -79,6 +81,16 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
             .product(fc)
             .map(|(((f, b), a), c)| f(a, b, c))
     }
+
+    apply_ap!(4);
+    apply_ap!(5);
+    apply_ap!(6);
+    apply_ap!(7);
+    apply_ap!(8);
+    apply_ap!(9);
+    apply_ap!(10);
+    apply_ap!(11);
+    apply_ap!(12);
 
     /// Combine two effectful values into a single effectful value using a binary function.
     ///

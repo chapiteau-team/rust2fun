@@ -91,6 +91,68 @@ pub fn noop_arity(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+#[proc_macro]
+pub fn apply_ap(input: TokenStream) -> TokenStream {
+    let arity = parse_arity(input);
+    let fn_name = format_ident!("ap{}", arity);
+    let msg = format!("Is a version of [Apply::ap] for a function of {arity} arguments.");
+
+    let types = ('A'..'Z').take(arity as usize);
+    let generic_type_args = types
+        .clone()
+        .filter(|&x| x != 'B')
+        .map(|t| format_ident!("{}", t));
+    let fn_args = types.clone().map(|t| {
+        let a = format_ident!("f{}", t.to_lowercase().next().unwrap());
+        let t = format_ident!("{}", t);
+        quote!(#a: Self::Target<#t>)
+    });
+    let constraints = {
+        let (f, mut c) = generic_type_args.clone().fold(
+            (quote!((Self::Param, B)), Vec::new()),
+            |(curr, mut gen), t| {
+                let next = quote!((#curr, #t));
+                let next_gen = quote! {
+                    Self::Target< #curr >: Semigroupal< #t >
+                        + Higher<Target< #t > = Self::Target< #t >>
+                        + Higher<Target< #next > = Self::Target< #next >>
+                };
+                gen.push(next_gen);
+                (next, gen)
+            },
+        );
+
+        c.push(quote!(Self::Target< #f >: Functor<Z, Target<Z> = Self::Target<Z>>));
+        c
+    };
+    let fn_types = types.clone().map(|t| format_ident!("{}", t));
+    let f_args = types.map(|t| format_ident!("{}", t.to_lowercase().next().unwrap()));
+
+    let types = ['B', 'A'].into_iter().chain('C'..'Z').take(arity as usize);
+    let products = types.clone().map(|t| {
+        let a = format_ident!("f{}", t.to_lowercase().next().unwrap());
+        quote!(product(#a))
+    });
+    let map_pattern = types
+        .map(|t| format_ident!("{}", t.to_lowercase().next().unwrap()))
+        .fold(quote!(func), |acc, a| quote!((#acc, #a)));
+
+    let expanded = quote! {
+        #[doc = #msg]
+        #[inline]
+        fn #fn_name<  #( #generic_type_args ),* , Z >( self, #( #fn_args ),*) -> Self::Target<Z>
+        where
+            Self::Param: FnOnce( #( #fn_types ),* ) -> Z,
+            Self: Sized,
+            #( #constraints ),*
+        {
+            self. #( #products ).* .map(| #map_pattern | func( #( #f_args ),* ))
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
 fn parse_arity(input: TokenStream) -> u32 {
     match input.into_iter().next().expect("arity is required") {
         TokenTree::Literal(x) => x
