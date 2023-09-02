@@ -2,7 +2,7 @@
 
 use core::marker::PhantomData;
 
-use rust2fun_macros::apply_ap;
+use rust2fun_macros::{apply_ap, apply_map};
 
 use crate::functor::Functor;
 use crate::prelude::Higher;
@@ -39,8 +39,7 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     fn ap2<A, Z>(self, fa: Self::Target<A>, fb: Self::Target<B>) -> Self::Target<Z>
     where
         Self::Param: FnOnce(A, B) -> Z,
-        Self::Target<(Self::Param, B)>: Semigroupal<A>
-            + Higher<Target<A> = Self::Target<A>>
+        Self::Target<(Self::Param, B)>: Apply<A, Target<A> = Self::Target<A>>
             + Higher<Target<((Self::Param, B), A)> = Self::Target<((Self::Param, B), A)>>,
         Self::Target<((Self::Param, B), A)>: Functor<Z, Target<Z> = Self::Target<Z>>,
         Self: Sized,
@@ -67,11 +66,9 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     ) -> Self::Target<Z>
     where
         Self::Param: FnOnce(A, B, C) -> Z,
-        Self::Target<(Self::Param, B)>: Semigroupal<A>
-            + Higher<Target<A> = Self::Target<A>>
+        Self::Target<(Self::Param, B)>: Apply<A, Target<A> = Self::Target<A>>
             + Higher<Target<((Self::Param, B), A)> = Self::Target<((Self::Param, B), A)>>,
-        Self::Target<((Self::Param, B), A)>: Semigroupal<C>
-            + Higher<Target<C> = Self::Target<C>>
+        Self::Target<((Self::Param, B), A)>: Apply<C, Target<C> = Self::Target<C>>
             + Higher<Target<(((Self::Param, B), A), C)> = Self::Target<(((Self::Param, B), A), C)>>,
         Self::Target<(((Self::Param, B), A), C)>: Functor<Z, Target<Z> = Self::Target<Z>>,
         Self: Sized,
@@ -131,14 +128,23 @@ pub trait Apply<B>: Functor<B> + Semigroupal<B> {
     fn map3<C, Z, F>(self, fb: Self::Target<B>, fc: Self::Target<C>, mut f: F) -> Self::Target<Z>
     where
         F: FnMut(Self::Param, B, C) -> Z,
-        Self::Target<(Self::Param, B)>: Apply<C, Target<C> = Self::Target<C>>,
-        Self::Target<(Self::Param, B)>: Higher<Target<Z> = Self::Target<Z>>,
-        <Self::Target<(Self::Param, B)> as Higher>::Target<((Self::Param, B), C)>:
-            Functor<Z, Target<Z> = Self::Target<Z>>,
+        Self::Target<(Self::Param, B)>: Apply<C, Target<C> = Self::Target<C>>
+            + Higher<Target<((Self::Param, B), C)> = Self::Target<((Self::Param, B), C)>>,
+        Self::Target<((Self::Param, B), C)>: Functor<Z, Target<Z> = Self::Target<Z>>,
         Self: Sized,
     {
-        self.product(fb).map2(fc, |(a, b), c| f(a, b, c))
+        self.product(fb).product(fc).map(|((a, b), c)| f(a, b, c))
     }
+
+    apply_map!(4);
+    apply_map!(5);
+    apply_map!(6);
+    apply_map!(7);
+    apply_map!(8);
+    apply_map!(9);
+    apply_map!(10);
+    apply_map!(11);
+    apply_map!(12);
 
     /// Compose two effectful values discarding the result of the first.
     ///

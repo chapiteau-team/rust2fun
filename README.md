@@ -65,7 +65,7 @@ use rust2fun::prelude::*;
 
 ### Data types:
 
-- non-empty vector (NEVec)
+- NEVec (non-empty vector)
 - Validated
 - ValidatedNev
 

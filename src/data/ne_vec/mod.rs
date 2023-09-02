@@ -89,25 +89,26 @@
 //! assert_eq!(nevec[2], 3);
 //! ```
 use core::num::NonZeroUsize;
-use std::{mem, ptr, vec};
 use std::ops::{Index, IndexMut};
 use std::vec::Vec;
+use std::{mem, ptr, vec};
 
-use crate::{flatmap_iter, higher, invariant_functor, semigroup_extend};
 use crate::applicative::Applicative;
 use crate::functor::Functor;
 use crate::prelude::Apply;
 use crate::semigroup::Semigroup;
 use crate::semigroupal::Semigroupal;
+use crate::{flatmap_iter, higher, invariant_functor, semigroup_extend};
 
-mod partial_eq;
-mod iter;
 mod from;
+mod iter;
+mod partial_eq;
 
 /// A non-empty vector. The first element is `head`, and the remaining elements are `tail`.
 /// The length of the NEVec is always at least one. The tail may be empty.
 ///
 /// See the [module-level documentation](self) for more details.
+#[allow(clippy::len_without_is_empty)]
 #[derive(Clone, Debug, Eq, Hash, PartialOrd, Ord)]
 pub struct NEVec<T> {
     /// The first element of the NEVec, known as the head.
@@ -180,8 +181,8 @@ impl<T> NEVec<T> {
     /// ```
     #[inline]
     pub fn from_elem(elem: T, n: NonZeroUsize) -> Self
-        where
-            T: Clone,
+    where
+        T: Clone,
     {
         Self {
             head: elem.clone(),
@@ -230,7 +231,10 @@ impl<T> NEVec<T> {
     /// assert_eq!(NEVec::<bool>::from_slice(&[]), None);
     /// ```
     #[inline]
-    pub fn from_slice(slice: &[T]) -> Option<Self> where T: Clone {
+    pub fn from_slice(slice: &[T]) -> Option<Self>
+    where
+        T: Clone,
+    {
         slice.split_first().map(|(h, t)| Self {
             head: h.clone(),
             tail: t.to_vec(),
@@ -564,7 +568,10 @@ impl<T> NEVec<T> {
     /// assert_eq!(nevec, [1, 2, 3]);
     /// ```
     #[inline]
-    pub fn to_vec(&self) -> Vec<T> where T: Clone {
+    pub fn to_vec(&self) -> Vec<T>
+    where
+        T: Clone,
+    {
         let mut vec = Vec::with_capacity(self.len());
         vec.push(self.head.clone());
         vec.extend_from_slice(&self.tail);
@@ -602,7 +609,7 @@ impl<T: Default> Default for NEVec<T> {
 
 impl<T> Extend<T> for NEVec<T> {
     #[inline]
-    fn extend<I: IntoIterator<Item=T>>(&mut self, iter: I) {
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         self.tail.extend(iter);
     }
 }
@@ -721,8 +728,8 @@ impl<A, B> Semigroupal<B> for NEVec<A> {
 impl<F, B> Apply<B> for NEVec<F> {
     #[inline]
     fn ap<A>(self, fa: NEVec<A>) -> NEVec<B>
-        where
-            Self::Param: FnOnce(A) -> B,
+    where
+        Self::Param: FnOnce(A) -> B,
     {
         NEVec {
             head: (self.head)(fa.head),

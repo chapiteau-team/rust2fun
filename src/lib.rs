@@ -2,6 +2,7 @@
 
 #![no_std]
 #![deny(missing_docs)]
+#![allow(clippy::too_many_arguments)]
 
 extern crate rust2fun_macros;
 #[cfg(feature = "std")]
