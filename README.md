@@ -157,6 +157,36 @@ fn validate_credit_card(
 }
 ```
 
+3. `bind!` notation for monads (like `do` notation in Haskell or `for` comprehension in Scala):
+
+Assuming we have the following functions defined:
+
+```rust
+fn get_opening_prices() -> Vec<(AssetId, i32)> {
+  // Get opening prices from an external service
+}
+
+fn get_closing_prices() -> Vec<(AssetId, i32)> {
+  // Get closing prices from an external service
+}
+
+fn get_asset_name(id: AssetId) -> Option<String> {
+  // Recover asset name for the given id
+}
+```
+
+...we can use `bind!` notation to calculate daily profit for each asset:
+
+```rust
+let profits: Vec<(String, i32)> = bind! {
+    (id_open, opening_price) in get_opening_prices();
+    (id_close, closing_price) in get_closing_prices();
+    (id, diff) in if id_open == id_close && closing_price > opening_price { vec![(id_open, closing_price - opening_price)] } else { vec![] };
+    name in match get_asset_name(id) {Some(name) => vec![name], None => vec![]};
+    (name, diff)
+};
+```
+
 ## Release notes
 
 0.1.0 (2023-01-22)
