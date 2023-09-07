@@ -30,6 +30,7 @@ pub mod functor;
 pub mod higher;
 pub mod invariant;
 pub mod monad;
+pub mod monoid;
 pub mod semigroup;
 pub mod semigroupal;
 
@@ -45,6 +46,7 @@ pub mod prelude {
     pub use crate::higher::*;
     pub use crate::invariant::*;
     pub use crate::monad::*;
+    pub use crate::monoid::*;
     pub use crate::semigroup::*;
     pub use crate::semigroupal::*;
     pub use crate::*;

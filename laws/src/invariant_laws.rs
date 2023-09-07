@@ -4,7 +4,7 @@ use crate::is_eq::IsEq;
 
 pub fn invariant_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Invariant<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
+    FA: Invariant<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Clone,
 {
     IsEq::equal_under_law(fa.clone(), fa.imap(id, id))
 }
@@ -21,7 +21,7 @@ where
         + Invariant<FC::Param, Target<FC::Param> = FC>
         + Clone,
     FB: Invariant<FC::Param, Target<FC::Param> = FC>,
-    FC: Higher + Eq,
+    FC: Higher,
 {
     IsEq::equal_under_law(
         fa.clone().imap(&mut f1, &mut f2).imap(&mut g1, &mut g2),

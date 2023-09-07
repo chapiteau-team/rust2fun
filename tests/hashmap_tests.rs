@@ -11,6 +11,7 @@ if_std! {
     use rust2fun_laws::flatmap_laws::*;
     use rust2fun_laws::functor_laws::*;
     use rust2fun_laws::invariant_laws::*;
+    use rust2fun_laws::monoid_laws::*;
     use rust2fun_laws::semigroup_laws::*;
     use rust2fun_laws::semigroupal_laws::*;
 
@@ -41,6 +42,13 @@ if_std! {
             prop_assert!(map2_product_consistency(fa.clone(), fb.clone(), |a, b| a.len() == b).holds());
             prop_assert!(product_r_consistency(fa.clone(), fb.clone()).holds());
             prop_assert!(product_l_consistency(fa, fb).holds());
+        }
+
+        #[test]
+        fn test_monoid(fa: HashMap<i32, String>) {
+            prop_assert!(monoid_left_identity(fa.clone()).holds());
+            prop_assert!(monoid_right_identity(fa.clone()).holds());
+            prop_assert!(is_id(fa).holds());
         }
     }
 

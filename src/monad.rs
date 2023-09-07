@@ -62,10 +62,9 @@
 //! // Or using the `bind!` macro:
 //! fn charge_user_card_alt(amount: u32, user_id: u32) -> Option<Transaction> {
 //!     bind! {
-//!         user in get_user(user_id);
-//!         card in get_credit_card(user);
-//!         tx in charge_credit_card(amount, card);
-//!         tx
+//!         for user in get_user(user_id);
+//!         for card in get_credit_card(user);
+//!         return charge_credit_card(amount, card);
 //!     }
 //! }
 //! ```
@@ -87,15 +86,15 @@ impl<T, B> Monad<B> for T where T: FlatMap<B> + Applicative {}
 /// use rust2fun::prelude::*;
 ///
 /// let actual = bind! {
-///     x in Some(1);
-///     y in Some(2);
+///     for x in Some(1);
+///     for y in Some(2);
 ///     x + y
 /// };
 /// assert_eq!(Some(3), actual);
 ///
 /// let actual = bind! {
-///     x in Some(1);
-///     y in None::<i32>;
+///     for x in Some(1);
+///     for y in None::<i32>;
 ///     x + y
 /// };
 /// assert_eq!(None, actual);
@@ -107,10 +106,10 @@ impl<T, B> Monad<B> for T where T: FlatMap<B> + Applicative {}
 /// use rust2fun::prelude::*;
 ///
 /// let actual = bind! {
-///     (_, a) in Some((1, 2));
+///     for (_, a) in Some((1, 2));
 ///     let b = 3;
 ///     std::println!("a = {}, b = {}", a, b);
-///     return a + b;
+///     a + b
 /// };
 ///
 /// assert_eq!(Some(5), actual);
@@ -122,17 +121,56 @@ impl<T, B> Monad<B> for T where T: FlatMap<B> + Applicative {}
 /// use rust2fun::prelude::*;
 ///
 /// let actual = bind! {
-///     x in Some(1);
-///     _guard in if x > 0 { Some(x) } else { None };
+///     for x in Some(1);
+///     for _guard in if x > 0 { Some(()) } else { None };
 ///     x
 /// };
 ///
 /// assert_eq!(Some(1), actual);
 /// ```
 ///
+/// ... or using the special `if` syntax for monoids.
+///
+/// ```
+/// use rust2fun::prelude::*;
+///
+/// let actual = bind! {
+///     for x in Some(1);
+///     for _guard in Some(()), if x > 0;
+///     x
+/// };
+///
+/// assert_eq!(Some(1), actual);
+/// ```
+///
+/// The last example can be rewritten with the return syntax as follows:
+///
+/// ```
+/// use rust2fun::prelude::*;
+///
+/// let actual = bind! {
+///     for x in Some(1);
+///     return Some(x), if x > 0;
+/// };
+///
+/// assert_eq!(Some(1), actual);
+/// ```
+///
+/// The return keyword is used to return the result of the last bind.
+///
+/// ```
+/// use rust2fun::prelude::*;
+///
+/// let actual = bind! {
+///     for x in Some(1);
+///     for y in Some(2);
+///     return Some(x + y);
+/// };
+///
+/// assert_eq!(Some(3), actual);
+/// ```
+///
 /// # Examples
-///
-///
 ///
 /// ```
 /// use rust2fun::prelude::*;
@@ -158,10 +196,11 @@ impl<T, B> Monad<B> for T where T: FlatMap<B> + Applicative {}
 /// }
 ///
 /// let profits = bind! {
-///     (id_open, opening_price) in get_opening_prices();
-///     (id_close, closing_price) in get_closing_prices();
-///     (id, diff) in if id_open == id_close && closing_price > opening_price { vec![(id_open, closing_price - opening_price)] } else { vec![] };
-///     name in match get_asset_name(id) {Some(name) => vec![name], None => vec![]};
+///     for (id_open, opening_price) in get_opening_prices();
+///     for (id_close, closing_price) in get_closing_prices();
+///     let diff = closing_price - opening_price;
+///     for name in get_asset_name(id_open).into_iter().collect::<Vec<_>>(),
+///         if id_open == id_close && diff > 0;
 ///     (name, diff)
 /// };
 ///
@@ -169,19 +208,27 @@ impl<T, B> Monad<B> for T where T: FlatMap<B> + Applicative {}
 /// ```
 #[macro_export]
 macro_rules! bind {
+    (return $e:expr, if $cond:expr;) => (
+        if $cond { $e } else { $crate::monoid::Monoid::empty() }
+    );
     (return $e:expr;) => (
-        $crate::applicative::Applicative::pure($e)
+        $e;
     );
     (let $x:ident : $t:ty  = $e:expr; $($rest:tt)+) => ({
         let $x : $t = $e;
         bind!($($rest)+)
     });
     (let $p:pat = $e:expr; $($rest:tt)+) => ({
-
         let $p = $e;
         bind!($($rest)+)
     });
-    ($p:pat in $e:expr; $($rest:tt)+) => (
+    (for $p:pat in $e:expr , if $cond:expr ; $($rest:tt)+) => (
+        $crate::flatmap::FlatMap::flat_map(
+            if $cond { $e } else { $crate::monoid::Monoid::empty() },
+            move |$p| bind!($($rest)+),
+        )
+    );
+    (for $p:pat in $e:expr; $($rest:tt)+) => (
         $crate::flatmap::FlatMap::flat_map($e, move |$p| bind!($($rest)+))
     );
     ($s:stmt;  $($rest:tt)+) => ({

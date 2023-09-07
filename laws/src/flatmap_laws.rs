@@ -8,7 +8,6 @@ where
     F: Fn(FA::Param) -> FA::Target<B>,
     G: Fn(B) -> FA::Target<C>,
     FA::Target<B>: FlatMap<C, Target<C> = FA::Target<C>>,
-    FA::Target<C>: Eq,
 {
     let lhs = fa.clone().flat_map(|a| f(a).flat_map(&mut g));
     let rhs = fa.flat_map(f).flat_map(g);
@@ -24,7 +23,6 @@ where
         + Apply<B, Target<B> = FA::Target<B>>
         + Higher<Target<FA::Param> = FA>
         + Clone,
-    FA::Target<B>: Eq,
 {
     let lhs = ff.clone().flat_map(|f| fa.clone().map(f));
     let rhs = ff.ap(fa);
@@ -38,7 +36,6 @@ where
     FA::Param: Copy,
     F: FnMut(FA::Param) -> FA::Target<B>,
     FA::Target<B>: Functor<(FA::Param, B), Target<(FA::Param, B)> = FA::Target<(FA::Param, B)>>,
-    FA::Target<(FA::Param, B)>: Eq,
 {
     let rhs = fa.clone().flat_map(|a| f(a).map(|b| (a, b)));
     let lhs = fa.m_product(f);

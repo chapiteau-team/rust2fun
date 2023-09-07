@@ -29,6 +29,7 @@ pub trait Semigroup {
     /// assert_eq!(3, 1.combine_n(2));
     /// assert_eq!(4, Semigroup::combine_n(1, 3));
     /// ```
+    #[inline]
     fn combine_n(self, n: u32) -> Self
     where
         Self: Sized + Clone,
@@ -62,6 +63,7 @@ pub trait Semigroup {
     ///     Some("heyheyhey".to_owned()),
     ///     Semigroup::combine_all_option(repeat("hey".to_owned()).take(3)));
     /// ```
+    #[inline]
     fn combine_all_option<I>(iter: I) -> Option<Self>
     where
         I: IntoIterator<Item = Self>,
@@ -84,6 +86,38 @@ macro_rules! semigroup_numeric {
 }
 
 semigroup_numeric! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+
+impl Semigroup for () {
+    #[inline]
+    fn combine(self, _other: Self) -> Self {}
+}
+
+macro_rules! semigroup_tuple {
+    ($($idx:tt $t:tt),+) => {
+        impl<$($t: Semigroup,)*> Semigroup for ($($t,)+)
+        {
+            #[inline]
+            fn combine(self, other: Self) -> Self {
+                ($(
+                    $t :: combine(self.$idx, other.$idx),
+                )+)
+            }
+        }
+    };
+}
+
+semigroup_tuple!(0 A);
+semigroup_tuple!(0 A, 1 B);
+semigroup_tuple!(0 A, 1 B, 2 C);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G, 7 H);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G, 7 H, 8 I);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G, 7 H, 8 I, 9 J);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G, 7 H, 8 I, 9 J, 10 K);
+semigroup_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G, 7 H, 8 I, 9 J, 10 K, 11 L);
 
 /// Macro to implement [Semigroup] for types with `append` method.
 #[macro_export]
@@ -131,10 +165,6 @@ macro_rules! semigroup_extend {
     };
 }
 
-impl Semigroup for () {
-    fn combine(self, _other: Self) -> Self {}
-}
-
 impl<T> Semigroup for PhantomData<T> {
     #[inline]
     fn combine(self, _other: Self) -> Self {
@@ -148,16 +178,6 @@ impl<T: Semigroup> Semigroup for Option<T> {
         match (self, other) {
             (Some(lhs), Some(rhs)) => Some(lhs.combine(rhs)),
             (x, y) => x.or(y),
-        }
-    }
-}
-
-impl<T: Semigroup, E> Semigroup for Result<T, E> {
-    #[inline]
-    fn combine(self, other: Self) -> Self {
-        match (self, other) {
-            (Ok(lhs), Ok(rhs)) => Ok(lhs.combine(rhs)),
-            (e @ Err(_), _) | (_, e @ Err(_)) => e,
         }
     }
 }

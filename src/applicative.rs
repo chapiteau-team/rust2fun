@@ -62,8 +62,6 @@
 //! }
 //! ```
 
-use core::marker::PhantomData;
-
 use crate::apply::Apply;
 use crate::higher::Higher;
 
@@ -102,13 +100,6 @@ where
         Self: Higher<Param = ()> + Sized,
     {
         Self::pure(())
-    }
-}
-
-impl<A> Applicative for PhantomData<A> {
-    #[inline]
-    fn pure(_x: A) -> Self {
-        PhantomData
     }
 }
 

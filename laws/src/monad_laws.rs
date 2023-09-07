@@ -7,7 +7,6 @@ where
     FA: Monad<B>,
     FA::Param: Clone,
     F: FnMut(FA::Param) -> FA::Target<B>,
-    FA::Target<B>: Eq,
 {
     let lhs = f(a.clone());
     let rhs = FA::pure(a).flat_map(f);
@@ -17,7 +16,7 @@ where
 
 pub fn monad_right_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Monad<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
+    FA: Monad<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Clone,
 {
     let lhs = fa.clone();
     let rhs = fa.flat_map(FA::pure);
@@ -29,7 +28,7 @@ pub fn map_flat_map_coherence<FA, B, F>(fa: FA, mut f: F) -> IsEq<FA::Target<B>>
 where
     FA: Monad<B> + Clone,
     F: FnMut(FA::Param) -> B,
-    FA::Target<B>: Applicative + Eq,
+    FA::Target<B>: Applicative,
 {
     let lhs = fa.clone().flat_map(|a| <FA::Target<B>>::pure(f(a)));
     let rhs = fa.map(f);

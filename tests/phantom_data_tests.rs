@@ -2,13 +2,11 @@ extern crate rust2fun_laws;
 
 use std::marker::PhantomData;
 
-use rust2fun_laws::applicative_laws::*;
 use rust2fun_laws::apply_laws::*;
 use rust2fun_laws::contravariant_laws::*;
 use rust2fun_laws::flatmap_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
-use rust2fun_laws::monad_laws::*;
 use rust2fun_laws::semigroup_laws::*;
 use rust2fun_laws::semigroupal_laws::*;
 
@@ -63,15 +61,6 @@ fn test_apply() {
 }
 
 #[test]
-fn test_applicative() {
-    assert!(applicative_identity(PhantomData::<u32>).holds());
-    assert!(applicative_homomorphism::<PhantomData<_>, _, _>(1, print).holds());
-    assert!(applicative_map(PhantomData::<i32>, print).holds());
-    assert!(ap_product_consistent(PhantomData, PhantomData::<fn(i32) -> String>).holds());
-    assert!(applicative_unit::<PhantomData<_>>(1).holds());
-}
-
-#[test]
 fn test_flatmap() {
     assert!(flat_map_associativity(
         PhantomData::<i32>,
@@ -81,11 +70,4 @@ fn test_flatmap() {
     .holds());
     assert!(flat_map_consistent_apply(PhantomData, PhantomData::<fn(i32) -> u32>).holds());
     assert!(m_product_consistency(PhantomData, |_: bool| PhantomData::<u32>).holds());
-}
-
-#[test]
-fn test_monad() {
-    assert!(monad_left_identity::<PhantomData<_>, _, _>(1, |_| PhantomData::<u32>).holds());
-    assert!(monad_right_identity(PhantomData::<i32>).holds());
-    assert!(map_flat_map_coherence(PhantomData, print::<i32>).holds());
 }

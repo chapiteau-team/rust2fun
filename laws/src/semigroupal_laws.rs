@@ -15,7 +15,6 @@ where
     <FA::Target<(<FA as Higher>::Param, B)> as Higher>::Target<((FA::Param, B), C)>:
         Invariant<(FA::Param, B, C)>,
     FA::Target<(<FA as Higher>::Param, (B, C))>: Invariant<(FA::Param, B, C)>,
-    FA::Target<(FA::Param, B, C)>: Eq,
 {
     let lhs = fa
         .clone()

@@ -4,7 +4,7 @@ use crate::is_eq::IsEq;
 
 pub fn contravariant_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Contravariant<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
+    FA: Contravariant<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Clone,
 {
     IsEq::equal_under_law(fa.clone(), fa.contramap(id))
 }
@@ -19,7 +19,7 @@ where
         + Contravariant<FC::Param, Target<FC::Param> = FC>
         + Clone,
     FB: Contravariant<FC::Param, Target<FC::Param> = FC>,
-    FC: Higher + Eq,
+    FC: Higher,
 {
     IsEq::equal_under_law(
         fa.clone().contramap(&mut f).contramap(&mut g),
@@ -29,7 +29,7 @@ where
 
 pub fn lift_contravariant_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Contravariant<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
+    FA: Contravariant<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Clone,
 {
     let mut f = lift_contravariant(id);
     IsEq::equal_under_law(fa.clone(), f(fa))
@@ -45,7 +45,7 @@ where
         + Contravariant<FC::Param, Target<FC::Param> = FC>
         + Clone,
     FB: Contravariant<FC::Param, Target<FC::Param> = FC>,
-    FC: Higher + Eq,
+    FC: Higher,
 {
     let lhs = {
         let mut ff = lift_contravariant(&mut f);

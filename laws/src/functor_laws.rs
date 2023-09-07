@@ -4,7 +4,7 @@ use crate::is_eq::IsEq;
 
 pub fn covariant_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Functor<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
+    FA: Functor<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Clone,
 {
     IsEq::equal_under_law(fa.clone(), fa.map(id))
 }
@@ -19,14 +19,14 @@ where
         + Functor<FC::Param, Target<FC::Param> = FC>
         + Clone,
     FB: Functor<FC::Param, Target<FC::Param> = FC>,
-    FC: Higher + Eq,
+    FC: Higher,
 {
     IsEq::equal_under_law(fa.clone().map(&mut f).map(&mut g), fa.map(compose!(g, f)))
 }
 
 pub fn lift_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Functor<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Eq + Clone,
+    FA: Functor<<FA as Higher>::Param, Target<<FA as Higher>::Param> = FA> + Clone,
 {
     let mut f = lift(id);
     IsEq::equal_under_law(fa.clone(), f(fa))
@@ -42,7 +42,7 @@ where
         + Functor<FC::Param, Target<FC::Param> = FC>
         + Clone,
     FB: Functor<FC::Param, Target<FC::Param> = FC>,
-    FC: Higher + Eq,
+    FC: Higher,
 {
     let lhs = {
         let mut ff = lift(&mut f);

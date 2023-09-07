@@ -4,7 +4,7 @@ use crate::is_eq::IsEq;
 
 pub fn applicative_identity<FA>(fa: FA) -> IsEq<FA>
 where
-    FA: Higher + Eq + Clone,
+    FA: Higher + Clone,
     FA::Target<fn(FA::Param) -> FA::Param>: Applicative + Apply<FA::Param, Target<FA::Param> = FA>,
 {
     let lhs: FA = <FA::Target<fn(FA::Param) -> FA::Param>>::pure(id).ap(fa.clone());
@@ -17,7 +17,7 @@ where
     FA::Param: Clone,
     FA::Target<F>:
         Applicative + Apply<FB::Param, Target<FB::Param> = FB> + Higher<Target<FA::Param> = FA>,
-    FB: Applicative + Eq,
+    FB: Applicative,
     F: FnMut(FA::Param) -> FB::Param,
 {
     let lhs = Applicative::pure(f(a.clone()));
@@ -31,7 +31,6 @@ where
     F: FnMut(FA::Param) -> B,
     FA::Target<F>:
         Applicative + Apply<B, Target<B> = FA::Target<B>> + Higher<Target<FA::Param> = FA>,
-    FA::Target<B>: Eq,
 {
     let lhs = fa.clone().map(&mut f);
     let rhs = <FA::Target<F>>::pure(f).ap(fa);
@@ -47,7 +46,6 @@ where
         + Semigroupal<FA::Param, Target<(F, FA::Param)> = FA::Target<(F, FA::Param)>>
         + Clone,
     FA::Target<(F, FA::Param)>: Functor<B>,
-    FA::Target<B>: Eq,
 {
     let lhs = ff.clone().ap(fa.clone());
     let rhs = ff.product(fa).map(|(f, a)| f(a)).unsafe_cast();
@@ -57,7 +55,7 @@ where
 
 pub fn applicative_unit<FA>(a: FA::Param) -> IsEq<FA>
 where
-    FA: Applicative + Eq,
+    FA: Applicative,
     FA::Param: Clone,
     FA::Target<()>: Applicative + Functor<FA::Param, Target<FA::Param> = FA>,
 {

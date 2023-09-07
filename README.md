@@ -179,10 +179,11 @@ fn get_asset_name(id: AssetId) -> Option<String> {
 
 ```rust
 let profits: Vec<(String, i32)> = bind! {
-    (id_open, opening_price) in get_opening_prices();
-    (id_close, closing_price) in get_closing_prices();
-    (id, diff) in if id_open == id_close && closing_price > opening_price { vec![(id_open, closing_price - opening_price)] } else { vec![] };
-    name in match get_asset_name(id) {Some(name) => vec![name], None => vec![]};
+    for (id_open, opening_price) in get_opening_prices();
+    for (id_close, closing_price) in get_closing_prices();
+    let diff = closing_price - opening_price;
+    for name in get_asset_name(id_open).into_iter().collect::<Vec<_>>(),
+        if id_open == id_close && diff > 0;
     (name, diff)
 };
 ```
