@@ -55,9 +55,11 @@ use rust2fun::prelude::*;
 ### Type classes:
 
 - Semigroup
+- Monoid
 - [Semigroupal](https://docs.rs/rust2fun/0.1.0/rust2fun/semigroupal/trait.Semigroupal.html)
 - [Invariant](https://docs.rs/rust2fun/0.1.0/rust2fun/invariant/trait.Invariant.html)
 - [Functor](https://docs.rs/rust2fun/0.1.0/rust2fun/functor/trait.Functor.html)
+- Bifunctor
 - [Apply](https://docs.rs/rust2fun/0.1.0/rust2fun/apply/trait.Apply.html)
 - [Applicative](https://docs.rs/rust2fun/0.1.0/rust2fun/applicative/trait.Applicative.html)
 - [FlatMap](https://docs.rs/rust2fun/0.1.0/rust2fun/flatmap/trait.FlatMap.html)

@@ -807,7 +807,7 @@ impl<P, E> Higher for Validated<P, E> {
 impl<T, E> Higher2 for Validated<T, E> {
     type Param1 = T;
     type Param2 = E;
-    type Target<TV, TI> = Validated<TV, TI>;
+    type Target<TV, TE> = Validated<TV, TE>;
 }
 
 invariant_functor!(Validated<T, E>);
