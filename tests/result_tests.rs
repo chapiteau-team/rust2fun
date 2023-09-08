@@ -4,6 +4,7 @@ use proptest::prelude::*;
 
 use rust2fun_laws::applicative_laws::*;
 use rust2fun_laws::apply_laws::*;
+use rust2fun_laws::bifunctor_laws::*;
 use rust2fun_laws::flatmap_laws::*;
 use rust2fun_laws::functor_laws::*;
 use rust2fun_laws::invariant_laws::*;
@@ -27,6 +28,12 @@ proptest! {
         prop_assert!(covariant_composition(fa, print, parse::<bool>).holds());
         prop_assert!(lift_identity(fa).holds());
         prop_assert!(lift_composition(fa, print, parse::<bool>).holds());
+    }
+
+    #[test]
+    fn test_bifunctor(fa: Result<bool, i32>) {
+        prop_assert!(bifunctor_identity(fa.clone()).holds());
+        prop_assert!(bifunctor_composition(fa, print, parse::<bool>, print, parse::<i32>).holds())
     }
 
     #[test]

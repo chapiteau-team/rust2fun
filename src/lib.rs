@@ -22,6 +22,7 @@ macro_rules! if_std {
 
 pub mod applicative;
 pub mod apply;
+pub mod bifunctor;
 pub mod combinator;
 pub mod contravariant;
 pub mod data;
@@ -38,6 +39,7 @@ pub mod semigroupal;
 pub mod prelude {
     pub use crate::applicative::*;
     pub use crate::apply::*;
+    pub use crate::bifunctor::*;
     pub use crate::combinator::*;
     pub use crate::contravariant::*;
     pub use crate::data::*;

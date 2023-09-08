@@ -79,8 +79,9 @@ pub use Validated::{Invalid, Valid};
 
 use crate::applicative::Applicative;
 use crate::apply::Apply;
+use crate::bifunctor::Bifunctor;
 use crate::functor::Functor;
-use crate::higher::Higher;
+use crate::higher::{Higher, Higher2};
 use crate::invariant_functor;
 use crate::semigroup::Semigroup;
 use crate::semigroupal::Semigroupal;
@@ -803,6 +804,12 @@ impl<P, E> Higher for Validated<P, E> {
     type Target<T> = Validated<T, E>;
 }
 
+impl<T, E> Higher2 for Validated<T, E> {
+    type Param1 = T;
+    type Param2 = E;
+    type Target<TV, TI> = Validated<TV, TI>;
+}
+
 invariant_functor!(Validated<T, E>);
 
 impl<A, B, E> Functor<B> for Validated<A, E> {
@@ -851,6 +858,19 @@ impl<T: Semigroup, E: Semigroup> Semigroup for Validated<T, E> {
             (Valid(lhs), Valid(rhs)) => Valid(lhs.combine(rhs)),
             (Invalid(lhs), Invalid(rhs)) => Invalid(lhs.combine(rhs)),
             (e @ Invalid(_), _) | (_, e @ Invalid(_)) => e,
+        }
+    }
+}
+
+impl<A, B, C, D> Bifunctor<C, D> for Validated<A, B> {
+    fn bimap(
+        self,
+        mut f: impl FnMut(Self::Param1) -> C,
+        mut g: impl FnMut(Self::Param2) -> D,
+    ) -> Self::Target<C, D> {
+        match self {
+            Valid(x) => Valid(f(x)),
+            Invalid(e) => Invalid(g(e)),
         }
     }
 }
