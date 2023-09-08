@@ -22,9 +22,9 @@ use core::marker::PhantomData;
 
 /// Implementation of Lightweight Higher Kinded Type for a type of kind `* -> *`.
 pub trait Higher {
-    /// Type parameter abstracted by Higher, i.e `Option<Param>`.
+    /// Type parameter abstracted by Higher, i.e. `Option<Param>`.
     type Param;
-    /// Swapped higher type, i.e Target = Option<T>.
+    /// Swapped higher type, i.e. Target = Option<T>.
     type Target<T>: Higher<Param = T>;
 
     /// Unsafe cast from one [Higher] type to another. This is a safe operation as long as the
@@ -39,6 +39,16 @@ pub trait Higher {
         core::mem::forget(self);
         result
     }
+}
+
+/// Implementation of Higher Kinded Type for a type of kind `*, * -> *, *`.
+pub trait Higher2 {
+    /// First type parameter abstracted by Higher2, i.e. `Result<Param1, _>`.
+    type Param1;
+    /// Second type parameter abstracted by Higher2, i.e. `Result<_, Param2>`.
+    type Param2;
+    /// Swapped higher type for 2 types, i.e Target = Result<T1, T2>.
+    type Target<T1, T2>: Higher2<Param1 = T1, Param2 = T2>;
 }
 
 /// Macro implementing `Higher` for a given type of kind `* -> *`.
@@ -80,6 +90,18 @@ impl<P, E> Higher for Result<P, E> {
     type Target<T> = Result<T, E>;
 }
 
+impl<P, E> Higher2 for Result<P, E> {
+    type Param1 = P;
+    type Param2 = E;
+    type Target<TP, TE> = Result<TP, TE>;
+}
+
+impl<A, B> Higher2 for (A, B) {
+    type Param1 = A;
+    type Param2 = B;
+    type Target<TA, TB> = (TA, TB);
+}
+
 if_std! {
     use std::boxed::Box;
     use std::collections::*;
@@ -96,5 +118,11 @@ if_std! {
     impl<K, V> Higher for HashMap<K, V> {
         type Param = V;
         type Target<T> = HashMap<K, T>;
+    }
+
+    impl<K, V> Higher2 for HashMap<K, V>{
+        type Param1 = K;
+        type Param2 = V;
+        type Target<TK, TV> = HashMap<TK, TV>;
     }
 }
