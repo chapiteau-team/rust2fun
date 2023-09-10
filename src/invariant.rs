@@ -54,7 +54,7 @@ macro_rules! invariant_functor {
     };
 }
 
-/// Macro to implement [Invariant] for types implementing [Contravariant].
+/// Macro to implement [Invariant] for types implementing a contravariant [Functor].
 #[macro_export]
 macro_rules! invariant_contravariant {
     ($name:ident<$( $t:tt ),+>) => {

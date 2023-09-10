@@ -88,6 +88,8 @@
 //! assert_eq!(nevec[1], 2);
 //! assert_eq!(nevec[2], 3);
 //! ```
+//!
+//! [`ne_vec!`]: crate::ne_vec
 use core::num::NonZeroUsize;
 use std::ops::{Index, IndexMut};
 use std::vec::Vec;
@@ -680,8 +682,6 @@ fn non_empty_invariant_failed() -> ! {
 ///
 /// Also, note that `ne_vec![expr; 0]` is not allowed, and will panic, because
 /// it violates the invariant that a `NEVec` cannot be empty.
-///
-/// [`NEVec`]: crate::ne_vec::NEVec
 #[macro_export]
 macro_rules! ne_vec {
     ($head:expr) => (

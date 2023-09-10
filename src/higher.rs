@@ -22,9 +22,9 @@ use core::marker::PhantomData;
 
 /// Implementation of Lightweight Higher Kinded Type for a type of kind `* -> *`.
 pub trait Higher {
-    /// Type parameter abstracted by Higher, i.e. `Option<Param>`.
+    /// Type parameter abstracted by Higher, e.g. `Option<Param>`.
     type Param;
-    /// Swapped higher type, i.e. Target = Option<T>.
+    /// Swapped higher type, e.g. Target = `Option<T>`.
     type Target<T>: Higher<Param = T>;
 
     /// Unsafe cast from one [Higher] type to another. This is a safe operation as long as the
@@ -43,11 +43,11 @@ pub trait Higher {
 
 /// Implementation of Higher Kinded Type for a type of kind `*, * -> *, *`.
 pub trait Higher2 {
-    /// First type parameter abstracted by Higher2, i.e. `Result<Param1, _>`.
+    /// First type parameter abstracted by Higher2, e.g. `Result<Param1, _>`.
     type Param1;
-    /// Second type parameter abstracted by Higher2, i.e. `Result<_, Param2>`.
+    /// Second type parameter abstracted by Higher2, e.g. `Result<_, Param2>`.
     type Param2;
-    /// Swapped higher type for 2 types, i.e Target = Result<T1, T2>.
+    /// Swapped higher type for 2 types, e.g. Target = `Result<T1, T2>`.
     type Target<T1, T2>: Higher2<Param1 = T1, Param2 = T2>;
 }
 

@@ -80,7 +80,7 @@ pub trait Functor<B>: Invariant<B> {
     /// ```
     fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B>;
 
-    /// Alias for [map] if the implementing type already had a built-in `.map` method.
+    /// Alias for [Functor::map] if the implementing type already had a built-in `.map` method.
     #[inline]
     fn fmap<F>(self, f: F) -> Self::Target<B>
     where
