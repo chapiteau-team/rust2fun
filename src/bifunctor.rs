@@ -17,11 +17,7 @@ pub trait Bifunctor<C, D>: Higher2 {
 }
 
 impl<A, B, C, D> Bifunctor<C, D> for Result<A, B> {
-    fn bimap(
-        self,
-        mut f: impl FnMut(Self::Param1) -> C,
-        mut g: impl FnMut(Self::Param2) -> D,
-    ) -> Result<C, D> {
+    fn bimap(self, mut f: impl FnMut(A) -> C, mut g: impl FnMut(B) -> D) -> Result<C, D> {
         match self {
             Ok(x) => Ok(f(x)),
             Err(e) => Err(g(e)),
@@ -30,11 +26,7 @@ impl<A, B, C, D> Bifunctor<C, D> for Result<A, B> {
 }
 
 impl<A, B, C, D> Bifunctor<C, D> for (A, B) {
-    fn bimap(
-        self,
-        mut f: impl FnMut(Self::Param1) -> C,
-        mut g: impl FnMut(Self::Param2) -> D,
-    ) -> Self::Target<C, D> {
+    fn bimap(self, mut f: impl FnMut(A) -> C, mut g: impl FnMut(B) -> D) -> (C, D) {
         (f(self.0), g(self.1))
     }
 }
@@ -46,9 +38,9 @@ if_std! {
     impl<A, B, C: Eq+Hash, D> Bifunctor<C, D> for HashMap<A, B> {
         fn bimap(
             self,
-            mut f: impl FnMut(Self::Param1) -> C,
-            mut g: impl FnMut(Self::Param2) -> D,
-        ) -> Self::Target<C, D> {
+            mut f: impl FnMut(A) -> C,
+            mut g: impl FnMut(B) -> D,
+        ) -> HashMap<C, D> {
                 self.into_iter().map(|(k, v)| (f(k), g(v))).collect()
         }
     }

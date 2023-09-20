@@ -95,12 +95,13 @@ use std::ops::{Index, IndexMut};
 use std::vec::Vec;
 use std::{mem, ptr, vec};
 
-use crate::applicative::Applicative;
 use crate::functor::Functor;
-use crate::prelude::Apply;
+use crate::pure::Pure;
 use crate::semigroup::Semigroup;
-use crate::semigroupal::Semigroupal;
-use crate::{flatmap_iter, higher, invariant_functor, semigroup_extend};
+use crate::{
+    and_then_flat_map, apply_iter, flatmap_iter, higher, invariant_functor, semigroup_extend,
+    semigroupal_iter,
+};
 
 mod from;
 mod iter;
@@ -700,10 +701,13 @@ macro_rules! ne_vec {
     );
 }
 
-semigroup_extend!(NEVec);
 higher!(NEVec);
-invariant_functor!(NEVec<T>);
+apply_iter!(NEVec);
 flatmap_iter!(NEVec);
+semigroupal_iter!(NEVec);
+semigroup_extend!(NEVec);
+invariant_functor!(NEVec<T>);
+and_then_flat_map!(NEVec<T>);
 
 impl<A, B> Functor<B> for NEVec<A> {
     #[inline]
@@ -715,30 +719,7 @@ impl<A, B> Functor<B> for NEVec<A> {
     }
 }
 
-impl<A, B> Semigroupal<B> for NEVec<A> {
-    #[inline]
-    fn product(self, fb: NEVec<B>) -> NEVec<(A, B)> {
-        NEVec {
-            head: (self.head, fb.head),
-            tail: self.tail.product(fb.tail),
-        }
-    }
-}
-
-impl<F, B> Apply<B> for NEVec<F> {
-    #[inline]
-    fn ap<A>(self, fa: NEVec<A>) -> NEVec<B>
-    where
-        Self::Param: FnOnce(A) -> B,
-    {
-        NEVec {
-            head: (self.head)(fa.head),
-            tail: self.tail.ap(fa.tail),
-        }
-    }
-}
-
-impl<T> Applicative for NEVec<T> {
+impl<T> Pure for NEVec<T> {
     #[inline]
     fn pure(x: T) -> Self {
         NEVec::new(x)

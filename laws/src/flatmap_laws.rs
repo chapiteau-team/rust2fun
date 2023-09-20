@@ -20,7 +20,7 @@ where
     FA: Functor<B> + Clone,
     F: Fn(FA::Param) -> B,
     FA::Target<F>: FlatMap<B, Target<B> = FA::Target<B>>
-        + Apply<B, Target<B> = FA::Target<B>>
+        + Apply<FA::Param, B, Target<B> = FA::Target<B>>
         + Higher<Target<FA::Param> = FA>
         + Clone,
 {

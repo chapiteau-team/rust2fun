@@ -2,7 +2,6 @@
 
 use core::marker::PhantomData;
 
-use crate::functor::Functor;
 use crate::higher::Higher;
 
 /// Invariant functor (also known as exponential functor).
@@ -25,7 +24,10 @@ pub trait Invariant<B>: Higher {
         G: FnMut(B) -> Self::Param;
 }
 
+// TODO. Refactor this when specialization is stable.
 /// Macro to implement [Invariant] for types implementing [Functor].
+///
+/// [Functor]: crate::functor::Functor
 #[macro_export]
 macro_rules! invariant_functor {
     ($name:ident<$( $t:tt ),+>) => {
@@ -36,7 +38,7 @@ macro_rules! invariant_functor {
                 F: FnMut(Self::Param) -> B,
                 G: FnMut(B) -> Self::Param,
             {
-                self.fmap(f)
+                $crate::functor::Functor::map(self, f)
             }
         }
     };
@@ -48,13 +50,16 @@ macro_rules! invariant_functor {
                 F: FnMut(Self::Param) -> B,
                 G: FnMut(B) -> Self::Param,
             {
-                self.fmap(f)
+                $crate::functor::Functor::map(self, f)
             }
         }
     };
 }
 
+// TODO. Refactor this when specialization is stable.
 /// Macro to implement [Invariant] for types implementing a contravariant [Functor].
+///
+/// [Functor]: crate::functor::Functor
 #[macro_export]
 macro_rules! invariant_contravariant {
     ($name:ident<$( $t:tt ),+>) => {
@@ -65,7 +70,7 @@ macro_rules! invariant_contravariant {
                 F: FnMut(Self::Param) -> B,
                 G: FnMut(B) -> Self::Param,
             {
-                self.contramap(g)
+                $crate::contravariant::Contravariant::contramap(self, g)
             }
         }
     };
@@ -77,7 +82,7 @@ macro_rules! invariant_contravariant {
                 F: FnMut(Self::Param) -> B,
                 G: FnMut(B) -> Self::Param,
             {
-                self.contramap(g)
+                $crate::contravariant::Contravariant::contramap(self, g)
             }
         }
     };
@@ -87,8 +92,8 @@ impl<A, B> Invariant<B> for PhantomData<A> {
     #[inline]
     fn imap<F, G>(self, _f: F, _g: G) -> PhantomData<B>
     where
-        F: FnMut(Self::Param) -> B,
-        G: FnMut(B) -> Self::Param,
+        F: FnMut(A) -> B,
+        G: FnMut(B) -> A,
     {
         PhantomData
     }
@@ -115,8 +120,8 @@ if_std! {
         #[inline]
         fn imap<F, G>(self, mut f: F, _g: G) -> HashMap<K, B>
         where
-            F: FnMut(Self::Param) -> B,
-            G: FnMut(B) -> Self::Param,
+            F: FnMut(A) -> B,
+            G: FnMut(B) -> A,
         {
             self.into_iter().map(|(k, v)| (k, f(v))).collect()
         }

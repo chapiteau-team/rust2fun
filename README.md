@@ -69,6 +69,8 @@ use rust2fun::prelude::*;
 - [Invariant](https://docs.rs/rust2fun/0.2.0/rust2fun/invariant/trait.Invariant.html)
 - [Functor](https://docs.rs/rust2fun/0.2.0/rust2fun/functor/trait.Functor.html)
 - [Bifunctor](https://docs.rs/rust2fun/0.2.0/rust2fun/bifunctor/trait.Bifunctor.html)
+- Pure
+- AndThen
 - [Apply](https://docs.rs/rust2fun/0.2.0/rust2fun/apply/trait.Apply.html)
 - [Applicative](https://docs.rs/rust2fun/0.2.0/rust2fun/applicative/trait.Applicative.html)
 - [FlatMap](https://docs.rs/rust2fun/0.2.0/rust2fun/flatmap/trait.FlatMap.html)
@@ -164,7 +166,7 @@ fn validate_credit_card(
     let expiration = validate_expiration(expiration).into();
     let cvv = validate_cvv(cvv).into();
 
-    Apply::map3(number, expiration, cvv, CreditCard::new)
+    MapN::map3(number, expiration, cvv, CreditCard::new)
 }
 ```
 

@@ -2,7 +2,6 @@
 
 use core::marker::PhantomData;
 
-use crate::apply::Apply;
 use crate::combinator::id;
 use crate::constant1;
 use crate::functor::Functor;
@@ -11,7 +10,7 @@ use crate::higher::Higher;
 /// Gives access to the `flat_map` method. The motivation for separating this out of
 /// [Monad](super::monad::Monad) is that there are situations where `flat_map` can be implemented
 /// but not `pure`.
-pub trait FlatMap<B>: Apply<B> {
+pub trait FlatMap<B>: Higher {
     /// Maps a function over a value in the context and flattens the resulting nested context.
     /// This is the same  as `self.map(f).flatten()`.
     /// This is also known as `bind` or `>>=` in other languages.
@@ -134,7 +133,7 @@ macro_rules! flatmap_iter {
         }
     };
     ($name:ident, $ct:tt $(+ $dt:tt )*) => {
-        impl<A: $ct $(+ $dt )*, B: $ct $(+ $dt )*> $crate::flatmap::FlatMap<B> for $name<A> {
+        impl<A, B: $ct $(+ $dt )*> $crate::flatmap::FlatMap<B> for $name<A> {
             #[inline]
             fn flat_map<F>(self, f: F) -> Self::Target<B>
             where

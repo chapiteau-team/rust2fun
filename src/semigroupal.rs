@@ -16,10 +16,15 @@ pub trait Semigroupal<B>: Higher {
     /// ```
     /// use rust2fun::prelude::*;
     ///
-    /// let x = Some(1);
-    /// let y = Some("1");
-    /// let actual = x.product(y);
+    /// let fa = Some(1);
+    /// let fb = Some("1");
+    /// let actual = fa.product(fb);
     /// assert_eq!(Some((1, "1")), actual);
+    ///
+    /// let fa = vec![1, 2];
+    /// let fb = vec![3, 4];
+    /// let actual = fa.product(fb);
+    /// assert_eq!(vec![(1, 3), (1, 4), (2, 3), (2, 4)], actual);
     /// ```
     fn product(self, fb: Self::Target<B>) -> Self::Target<(Self::Param, B)>;
 }
@@ -28,23 +33,21 @@ pub trait Semigroupal<B>: Higher {
 #[macro_export]
 macro_rules! semigroupal_iter {
     ($name:ident) => {
-        impl<A, B> $crate::semigroupal::Semigroupal<B> for $name<A> {
+        impl<A: Clone, B: Clone> $crate::semigroupal::Semigroupal<B> for $name<A> {
             #[inline]
             fn product(self, fb: Self::Target<B>) -> Self::Target<(A, B)> {
                 self.into_iter()
-                    .zip(fb.into_iter())
-                    .map(|(a, b)| (a, b))
+                    .flat_map(|a| fb.clone().into_iter().map(move |b| (a. clone(), b)))
                     .collect()
             }
         }
     };
     ($name:ident, $ct:tt $(+ $dt:tt )*) => {
-        impl<A: $ct $(+ $dt )*, B: $ct $(+ $dt )*> $crate::semigroupal::Semigroupal<B> for $name<A> {
+        impl<A: Clone + $ct $(+ $dt )*, B: Clone + $ct $(+ $dt )*> $crate::semigroupal::Semigroupal<B> for $name<A> {
             #[inline]
             fn product(self, fb: Self::Target<B>) -> Self::Target<(A, B)> {
                 self.into_iter()
-                    .zip(fb.into_iter())
-                    .map(|(a, b)| (a, b))
+                    .flat_map(|a| fb.clone().into_iter().map(move |b| (a.clone(), b)))
                     .collect()
             }
         }
@@ -54,21 +57,28 @@ macro_rules! semigroupal_iter {
 impl<A, B> Semigroupal<B> for PhantomData<A> {
     #[inline]
     fn product(self, _fb: PhantomData<B>) -> PhantomData<(A, B)> {
-        PhantomData::<(Self::Param, B)>
+        PhantomData::<(A, B)>
     }
 }
 
 impl<A, B> Semigroupal<B> for Option<A> {
     #[inline]
     fn product(self, fb: Option<B>) -> Option<(A, B)> {
-        self.and_then(|a| fb.map(|b| (a, b)))
+        match (self, fb) {
+            (Some(a), Some(b)) => Some((a, b)),
+            _ => None,
+        }
     }
 }
 
 impl<A, B, E> Semigroupal<B> for Result<A, E> {
     #[inline]
     fn product(self, fb: Result<B, E>) -> Result<(A, B), E> {
-        self.and_then(|a| fb.map(|b| (a, b)))
+        match (self, fb) {
+            (Ok(a), Ok(b)) => Ok((a, b)),
+            (Err(e), _) => Err(e),
+            (_, Err(e)) => Err(e),
+        }
     }
 }
 

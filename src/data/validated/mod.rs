@@ -19,10 +19,10 @@
 //! ```
 //! use rust2fun::prelude::*;
 //!
-//! # struct CreditCardNumber;
-//! # struct Date;
-//! # struct Code;
-//! # struct Error;
+//! # type CreditCardNumber = String;
+//! # type Date = String;
+//! # type Code = u16;
+//! # type Error = u8;
 //! #
 //! # struct CreditCard {
 //! #     number: CreditCardNumber,
@@ -69,20 +69,21 @@
 //!     expiration: Date,
 //!     cvv: Code,
 //! ) -> ValidatedNev<CreditCard, Error> {
-//!     Apply::map3(validate_number(number),
-//!                 validate_expiration(expiration),
-//!                 validate_cvv(cvv),
-//!                 CreditCard::new)
+//!     MapN::map3(validate_number(number),
+//!                validate_expiration(expiration),
+//!                validate_cvv(cvv),
+//!                CreditCard::new)
 //! }
 //! ```
 pub use Validated::{Invalid, Valid};
 
-use crate::applicative::Applicative;
+use crate::and_then::AndThen;
 use crate::apply::Apply;
 use crate::bifunctor::Bifunctor;
 use crate::functor::Functor;
 use crate::higher::{Higher, Higher2};
 use crate::invariant_functor;
+use crate::pure::Pure;
 use crate::semigroup::Semigroup;
 use crate::semigroupal::Semigroupal;
 
@@ -814,7 +815,7 @@ invariant_functor!(Validated<T, E>);
 
 impl<A, B, E> Functor<B> for Validated<A, E> {
     #[inline]
-    fn map(self, f: impl FnMut(Self::Param) -> B) -> Self::Target<B> {
+    fn map(self, f: impl FnMut(A) -> B) -> Validated<B, E> {
         self.map(f)
     }
 }
@@ -830,11 +831,11 @@ impl<A, B, E: Semigroup> Semigroupal<B> for Validated<A, E> {
     }
 }
 
-impl<F, B, E: Semigroup> Apply<B> for Validated<F, E> {
+impl<F, A, B, E: Semigroup> Apply<A, B> for Validated<F, E> {
     #[inline]
-    fn ap<A>(self, fa: Validated<A, E>) -> Validated<B, E>
+    fn ap(self, fa: Validated<A, E>) -> Validated<B, E>
     where
-        Self::Param: FnOnce(A) -> B,
+        F: FnOnce(A) -> B,
     {
         match (self, fa) {
             (Valid(f), Valid(a)) => Valid(f(a)),
@@ -844,7 +845,7 @@ impl<F, B, E: Semigroup> Apply<B> for Validated<F, E> {
     }
 }
 
-impl<A, E: Semigroup> Applicative for Validated<A, E> {
+impl<A, E: Semigroup> Pure for Validated<A, E> {
     #[inline]
     fn pure(x: A) -> Self {
         Valid(x)
@@ -863,14 +864,21 @@ impl<T: Semigroup, E: Semigroup> Semigroup for Validated<T, E> {
 }
 
 impl<A, B, C, D> Bifunctor<C, D> for Validated<A, B> {
-    fn bimap(
-        self,
-        mut f: impl FnMut(Self::Param1) -> C,
-        mut g: impl FnMut(Self::Param2) -> D,
-    ) -> Self::Target<C, D> {
+    #[inline]
+    fn bimap(self, mut f: impl FnMut(A) -> C, mut g: impl FnMut(B) -> D) -> Validated<C, D> {
         match self {
             Valid(x) => Valid(f(x)),
             Invalid(e) => Invalid(g(e)),
         }
+    }
+}
+
+impl<A, B, E> AndThen<B> for Validated<A, E> {
+    #[inline]
+    fn and_then<F>(self, f: F) -> Validated<B, E>
+    where
+        F: FnMut(A) -> Validated<B, E>,
+    {
+        self.and_then(f)
     }
 }

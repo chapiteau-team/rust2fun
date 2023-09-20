@@ -4,7 +4,7 @@ use crate::is_eq::IsEq;
 
 pub fn map2_product_consistency<FA, FB, FC, F>(fa: FA, fb: FB, mut f: F) -> IsEq<FC>
 where
-    FA: Apply<FB::Param> + Higher<Target<FB::Param> = FB> + Higher<Target<FC::Param> = FC> + Clone,
+    FA: MapN<FB::Param> + Higher<Target<FB::Param> = FB> + Higher<Target<FC::Param> = FC> + Clone,
     FB: Higher + Clone,
     FC: Higher,
     F: FnMut(FA::Param, FB::Param) -> FC::Param,
@@ -18,7 +18,7 @@ where
 
 pub fn product_r_consistency<FA, FB>(fa: FA, fb: FB) -> IsEq<FB>
 where
-    FA: Apply<FB::Param> + Higher<Target<FB::Param> = FB> + Clone,
+    FA: MapN<FB::Param> + Higher<Target<FB::Param> = FB> + Clone,
     FB: Higher + Clone,
     FA::Target<(FA::Param, FB::Param)>: Functor<FB::Param, Target<FB::Param> = FB>,
 {
@@ -30,7 +30,7 @@ where
 
 pub fn product_l_consistency<FA, FB>(fa: FA, fb: FB) -> IsEq<FA>
 where
-    FA: Apply<FB::Param>
+    FA: MapN<FB::Param>
         + Higher<Target<FB::Param> = FB>
         + Higher<Target<<FA as Higher>::Param> = FA>
         + Clone,

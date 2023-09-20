@@ -69,13 +69,14 @@
 //! }
 //! ```
 
-use crate::prelude::{Applicative, FlatMap};
+use crate::prelude::FlatMap;
+use crate::pure::Pure;
 
 /// A monad. Allows composition of dependent effectful functions.
 /// See [the module level documentation](self) for more.
-pub trait Monad<B>: FlatMap<B> + Applicative {}
+pub trait Monad<B>: FlatMap<B> + Pure {}
 
-impl<T, B> Monad<B> for T where T: FlatMap<B> + Applicative {}
+impl<T, B> Monad<B> for T where T: FlatMap<B> + Pure {}
 
 /// Bind macro. Allows for a more natural syntax for monadic composition.
 /// It is similar to the `do` notation in Haskell or the `for` notation in Scala.
@@ -236,6 +237,6 @@ macro_rules! bind {
         bind!($($rest)+)
     });
     ($e:expr) => (
-        $crate::applicative::Applicative::pure($e)
+        $crate::pure::Pure::pure($e)
     );
 }
