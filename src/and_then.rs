@@ -1,6 +1,6 @@
 //! AndThen.
 
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 use crate::higher::Higher;
 

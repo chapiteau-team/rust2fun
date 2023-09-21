@@ -85,7 +85,7 @@ pub fn noop_arity(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         #[doc = #msg]
-        #[inline]
+        #[inline(always)]
         pub fn #fn_name< #( #type_args ),* >( #( #fn_args ),*) {}
     };
 

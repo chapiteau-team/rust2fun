@@ -227,7 +227,7 @@ tuple_arity!(12);
 ///
 /// noop();
 /// ```
-#[inline]
+#[inline(always)]
 pub const fn noop() {}
 
 /// The no operation function of 1 argument.
@@ -240,7 +240,7 @@ pub const fn noop() {}
 /// let actual = Some(1).map(noop1);
 /// assert_eq!(Some(()), actual);
 /// ```
-#[inline]
+#[inline(always)]
 pub fn noop1<T>(_: T) {}
 
 noop_arity!(2);
