@@ -216,3 +216,9 @@ let profits: Vec<(String, i32)> = bind! {
 - Added data types: NEVec, Validated
 - Added `bind!` notation
 - Multiple fixes and improvements
+
+0.2.1 (2023-09-21)
+
+- Fixed Semigroupal and Apply behavior (thanks [GoldsteinE](https://github.com/GoldsteinE) for the report)
+- Added type classes: Pure, AndThen
+- Refactored `mapX` and `apX` functions
