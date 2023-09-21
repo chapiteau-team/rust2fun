@@ -3,7 +3,7 @@
 # rust2fun (pronounced: rʌstafʌn)
 
 [![Crates.io](https://img.shields.io/crates/v/rust2fun.svg)](https://crates.io/crates/rust2fun)
-[![docs.rs](https://img.shields.io/docsrs/rust2fun)](https://docs.rs/rust2fun/0.2.0/rust2fun/)
+[![docs.rs](https://img.shields.io/docsrs/rust2fun)](https://docs.rs/rust2fun/0.2.1/rust2fun/)
 ![build](https://github.com/chapiteau-team/rust2fun/actions/workflows/rust.yml/badge.svg)
 
 A library for functional programming in Rust.
@@ -18,7 +18,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rust2fun = "0.2.0"
+rust2fun = "0.2.1"
 ```
 
 and import the prelude:
@@ -31,56 +31,56 @@ use rust2fun::prelude::*;
 
 ### Combinators:
 
-- function composition (with [compose](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.compose.html) macro)
-- pipelines (with [pipe](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.pipe.html) macro)
+- function composition (with [compose](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.compose.html) macro)
+- pipelines (with [pipe](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.pipe.html) macro)
 - currying
-    - [curry2](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.curry2.html) macro
-    - [curry3](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.curry3.html) macro
+    - [curry2](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.curry2.html) macro
+    - [curry3](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.curry3.html) macro
     - etc
-- argument flipping (with [flip](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.flip.html) macro)
+- argument flipping (with [flip](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.flip.html) macro)
 - constant functions
-    - [constant](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.constant.html) macro
-    - [constant1](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.constant1.html) macro (K combinator)
-    - [constant2](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.constant2.html) macro
+    - [constant](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.constant.html) macro
+    - [constant1](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.constant1.html) macro (K combinator)
+    - [constant2](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.constant2.html) macro
     - etc
-- [id](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.id.html) (I combinator)
-- [apply](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.apply.html) (A combinator)
-- [apply_to](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.apply_to.html) (T combinator)
-- [substitution](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.substitution.html) (S combinator)
-- [converge](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.converge.html)
-- [on](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.on.html)
-- [if_else](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.if_else.html)
-- [fix](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.fix.html) (Y combinator)
+- [id](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.id.html) (I combinator)
+- [apply](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.apply.html) (A combinator)
+- [apply_to](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.apply_to.html) (T combinator)
+- [substitution](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.substitution.html) (S combinator)
+- [converge](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.converge.html)
+- [on](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.on.html) (Psi combinator)
+- [if_else](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.if_else.html)
+- [fix](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.fix.html) (Y combinator)
 - no operation
-    - [noop](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.noop.html)
-    - [noop1](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.noop1.html)
-    - [noop2](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.noop2.html)
+    - [noop](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.noop.html)
+    - [noop1](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.noop1.html)
+    - [noop2](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.noop2.html)
     - etc
 - tuple constructors
-    - [tuple2](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.tuple2.html)
-    - [tuple3](https://docs.rs/rust2fun/0.2.0/rust2fun/combinator/fn.tuple3.html)
+    - [tuple2](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.tuple2.html)
+    - [tuple3](https://docs.rs/rust2fun/0.2.1/rust2fun/combinator/fn.tuple3.html)
     - etc
 
 ### Type classes:
 
-- [Semigroup](https://docs.rs/rust2fun/0.2.0/rust2fun/semigroup/trait.Semigroup.html)
-- [Monoid](https://docs.rs/rust2fun/0.2.0/rust2fun/monoid/trait.Monoid.html)
-- [Semigroupal](https://docs.rs/rust2fun/0.2.0/rust2fun/semigroupal/trait.Semigroupal.html)
-- [Invariant](https://docs.rs/rust2fun/0.2.0/rust2fun/invariant/trait.Invariant.html)
-- [Functor](https://docs.rs/rust2fun/0.2.0/rust2fun/functor/trait.Functor.html)
-- [Bifunctor](https://docs.rs/rust2fun/0.2.0/rust2fun/bifunctor/trait.Bifunctor.html)
-- Pure
-- AndThen
-- [Apply](https://docs.rs/rust2fun/0.2.0/rust2fun/apply/trait.Apply.html)
-- [Applicative](https://docs.rs/rust2fun/0.2.0/rust2fun/applicative/trait.Applicative.html)
-- [FlatMap](https://docs.rs/rust2fun/0.2.0/rust2fun/flatmap/trait.FlatMap.html)
-- [Monad](https://docs.rs/rust2fun/0.2.0/rust2fun/monad/trait.Monad.html) + ( [bind!](https://docs.rs/rust2fun/0.2.0/rust2fun/macro.bind.html) notation )
+- [Semigroup](https://docs.rs/rust2fun/0.2.1/rust2fun/semigroup/trait.Semigroup.html)
+- [Monoid](https://docs.rs/rust2fun/0.2.1/rust2fun/monoid/trait.Monoid.html)
+- [Semigroupal](https://docs.rs/rust2fun/0.2.1/rust2fun/semigroupal/trait.Semigroupal.html)
+- [Invariant](https://docs.rs/rust2fun/0.2.1/rust2fun/invariant/trait.Invariant.html)
+- [Functor](https://docs.rs/rust2fun/0.2.1/rust2fun/functor/trait.Functor.html)
+- [Bifunctor](https://docs.rs/rust2fun/0.2.1/rust2fun/bifunctor/trait.Bifunctor.html)
+- [Pure](https://docs.rs/rust2fun/0.2.1/rust2fun/pure/trait.Pure.html)
+- [AndThen](https://docs.rs/rust2fun/0.2.1/rust2fun/and_then/trait.AndThen.html)
+- [Apply](https://docs.rs/rust2fun/0.2.1/rust2fun/apply/trait.Apply.html)
+- [Applicative](https://docs.rs/rust2fun/0.2.1/rust2fun/applicative/trait.Applicative.html)
+- [FlatMap](https://docs.rs/rust2fun/0.2.1/rust2fun/flatmap/trait.FlatMap.html)
+- [Monad](https://docs.rs/rust2fun/0.2.1/rust2fun/monad/trait.Monad.html) + ( [bind!](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.bind.html) notation )
 
 ### Data types:
 
-- [NEVec](https://docs.rs/rust2fun/0.2.0/rust2fun/data/ne_vec/struct.NEVec.html) (non-empty vector)
-- [Validated](https://docs.rs/rust2fun/0.2.0/rust2fun/data/validated/enum.Validated.html)
-- [ValidatedNev](https://docs.rs/rust2fun/0.2.0/rust2fun/data/validated/type.ValidatedNev.html)
+- [NEVec](https://docs.rs/rust2fun/0.2.1/rust2fun/data/ne_vec/struct.NEVec.html) (non-empty vector)
+- [Validated](https://docs.rs/rust2fun/0.2.1/rust2fun/data/validated/enum.Validated.html)
+- [ValidatedNev](https://docs.rs/rust2fun/0.2.1/rust2fun/data/validated/type.ValidatedNev.html)
 
 ## Examples
 

@@ -13,7 +13,7 @@ proptest = "1.2"
 rust2fun_laws = { path = "./laws" }
 
 [dependencies]
-rust2fun_macros = { path = "./macros", version = "0.2.0" }
+rust2fun_macros = { path = "./macros", version = "0.2.1" }
 
 [features]
 default = ["std"]
@@ -27,7 +27,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Alexander kalan Kalankhodzhaev <kalansoft@gmail.com>"]
 repository = "https://github.com/chapiteau-team/rust2fun"
 license = "Apache-2.0"
