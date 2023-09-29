@@ -6,8 +6,8 @@
 //! ```
 //! use rust2fun::prelude::*;
 //!
-//! # type CreditCardNumber = String;
-//! # type Date = String;
+//! # type CreditCardNumber = u64;
+//! # type Date = (u8, u8);
 //! # type Code = u16;
 //! # type Error = u8;
 //! #
@@ -44,10 +44,10 @@
 //!     expiration: Date,
 //!     cvv: Code,
 //! ) -> Result<CreditCard, Error> {
-//!     Result::pure(CreditCard::new)
-//!         .ap3(validate_number(number),
-//!              validate_expiration(expiration),
-//!              validate_cvv(cvv))
+//!     Result::pure(curry3!(CreditCard::new))
+//!         .ap(validate_number(number))
+//!         .ap(validate_expiration(expiration))
+//!         .ap(validate_cvv(cvv))
 //! }
 //! ```
 
