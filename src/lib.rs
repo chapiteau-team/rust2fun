@@ -29,6 +29,7 @@ pub mod combinator;
 pub mod contravariant;
 pub mod data;
 pub mod flatmap;
+pub mod fn_k;
 pub mod functor;
 pub mod higher;
 pub mod invariant;
@@ -50,6 +51,7 @@ pub mod prelude {
     pub use crate::contravariant::*;
     pub use crate::data::*;
     pub use crate::flatmap::*;
+    pub use crate::fn_k::*;
     pub use crate::functor::*;
     pub use crate::higher::*;
     pub use crate::invariant::*;

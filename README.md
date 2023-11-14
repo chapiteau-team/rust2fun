@@ -75,6 +75,7 @@ use rust2fun::prelude::*;
 - [Applicative](https://docs.rs/rust2fun/0.2.1/rust2fun/applicative/trait.Applicative.html)
 - [FlatMap](https://docs.rs/rust2fun/0.2.1/rust2fun/flatmap/trait.FlatMap.html)
 - [Monad](https://docs.rs/rust2fun/0.2.1/rust2fun/monad/trait.Monad.html) + ( [bind!](https://docs.rs/rust2fun/0.2.1/rust2fun/macro.bind.html) notation )
+- FnK (functor transformation)
 
 ### Data types:
 
@@ -125,15 +126,15 @@ print_credit_card_of(all_users());
 Assuming we have the following validation rules that need to be applied to create a new credit card:
 
 ```rust
-fn validate_number(number: CreditCardNumber) -> Result<CreditCardNumber, Error> {
+fn validate_number(number: CreditCardNumber) -> ValidatedNev<CreditCardNumber, Error> {
     // Validating credit card number
 }
 
-fn validate_expiration(date: Date) -> Result<Date, Error> {
+fn validate_expiration(date: Date) -> ValidatedNev<Date, Error> {
     // Validating expiration date
 }
 
-fn validate_cvv(cvv: Code) -> Result<Code, Error> {
+fn validate_cvv(cvv: Code) -> ValidatedNev<Code, Error> {
     // Validating CVV code
 }
 ```
@@ -148,9 +149,9 @@ fn validate_credit_card(
     cvv: Code,
 ) -> ValidatedNev<CreditCard, Error> {
     ValidatedNev::pure(CreditCard::new)
-        .ap3(validate_number(number).into(),
-             validate_expiration(expiration).into(),
-             validate_cvv(cvv).into())
+        .ap3(validate_number(number),
+             validate_expiration(expiration),
+             validate_cvv(cvv))
 }
 ```
 
@@ -161,12 +162,11 @@ fn validate_credit_card(
     number: CreditCardNumber,
     expiration: Date,
     cvv: Code,
-) -> ValidatedNev<CreditCard, Error> {
-    let number: ValidatedNev<_, _> = validate_number(number).into();
-    let expiration = validate_expiration(expiration).into();
-    let cvv = validate_cvv(cvv).into();
-
-    MapN::map3(number, expiration, cvv, CreditCard::new)
+) -> ValidatedNev<CreditCard, Error> { 
+    MapN::map3(validate_number(number),
+               validate_expiration(expiration),
+               validate_cvv(cvv),
+               CreditCard::new)
 }
 ```
 
@@ -195,7 +195,7 @@ let profits: Vec<(String, i32)> = bind! {
     for (id_open, opening_price) in get_opening_prices();
     for (id_close, closing_price) in get_closing_prices();
     let diff = closing_price - opening_price;
-    for name in get_asset_name(id_open).into_iter().collect::<Vec<_>>(),
+    for name in OptionToVec.apply(get_asset_name(id_open)),
         if id_open == id_close && diff > 0;
     (name, diff)
 };

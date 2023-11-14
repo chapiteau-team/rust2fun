@@ -200,7 +200,7 @@ impl<T, B> Monad<B> for T where T: FlatMap<B> + Pure {}
 ///     for (id_open, opening_price) in get_opening_prices();
 ///     for (id_close, closing_price) in get_closing_prices();
 ///     let diff = closing_price - opening_price;
-///     for name in get_asset_name(id_open).into_iter().collect::<Vec<_>>(),
+///     for name in OptionToVec.apply(get_asset_name(id_open)),
 ///         if id_open == id_close && diff > 0;
 ///     (name, diff)
 /// };
