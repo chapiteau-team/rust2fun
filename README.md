@@ -1,4 +1,4 @@
-<img align="right" height="150" src="./rust2fun.svg">
+<img align="right" height="75" src="./rust2fun.svg">
 
 # rust2fun (pronounced: rʌstafʌn)
 
